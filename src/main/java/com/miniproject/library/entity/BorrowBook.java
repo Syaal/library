@@ -14,7 +14,7 @@ public class BorrowBook {
     private Date peminjaman;
 
     @OneToOne
-    private Anggota anggota;
+    private User user;
 
     @ManyToOne
     private Book book;
