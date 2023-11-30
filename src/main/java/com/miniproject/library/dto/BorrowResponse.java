@@ -16,7 +16,9 @@ import java.util.List;
 public class BorrowResponse {
     private Integer id;
     private Date peminjaman;
+    //nama user dan id atau bisa langung user aja
     private String nama;
+    private Integer userId;
     private List<Book> bookList;
 
     private Date pengembalian;

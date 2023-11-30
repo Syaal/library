@@ -14,8 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class BorrowRequest {
-    @NotBlank(message = "Masukkan Nama")
-    private String nama;
+    @NotBlank(message = "Masukkan Id Anggota")
+    private Integer userId;
     @NotBlank(message = "Buku tidak boleh kosong")
     private List<Integer> bookList;
 }
