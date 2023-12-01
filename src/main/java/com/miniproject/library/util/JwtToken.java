@@ -18,7 +18,7 @@ public class JwtToken {
         Key key = MacProvider.generateKey();
         return Jwts.builder()
                 .setSubject(String.valueOf(user.getId()))
-                .setAudience(String.valueOf(user.getNama()))
+                .setAudience(String.valueOf(user.getUsername()))
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS512, key)
