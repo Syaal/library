@@ -1,4 +1,4 @@
-package com.miniproject.library.dto;
+package com.miniproject.library.dto.book;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

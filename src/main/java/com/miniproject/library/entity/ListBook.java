@@ -3,18 +3,14 @@ package com.miniproject.library.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.util.Date;
-@Table(name = "ReturnBook")
 @Entity
 @Data
-public class ReturnBook {
+public class ListBook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Date returnDate;
     @ManyToOne
-    private Visitor visitor;
-    @OneToOne
     private BorrowBook borrowBook;
+    @ManyToOne
+    private Book book;
 }

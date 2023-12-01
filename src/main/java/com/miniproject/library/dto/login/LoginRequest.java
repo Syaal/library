@@ -1,4 +1,4 @@
-package com.miniproject.library.dto;
+package com.miniproject.library.dto.login;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserRequest {
-    @NotBlank(message = "Masukkan Nama")
-    private String nama;
-    @NotBlank(message = "Masukkan alamat")
-    private String alamat;
+public class LoginRequest {
     @NotBlank(message = "Masukkan email")
     private String email;
+    @NotBlank(message = "Masukkan password")
+
+    private String password;
+
 }

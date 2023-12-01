@@ -1,12 +1,7 @@
 package com.miniproject.library.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
-
-import java.util.Date;
 
 @Entity
 @Data
@@ -14,11 +9,12 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String judulBuku;
-    private String penerbit;
-    private String pengarang;
-    private Integer tahunTerbit;
+    private String title;
+    private String author;
+    private String publisher;
+    private Integer publicationDate;
     private Integer stock;
-    private Integer reading;
-    private Integer waiting;
+    private Integer read;
+    @ManyToOne
+    private Librarian librarian;
 }

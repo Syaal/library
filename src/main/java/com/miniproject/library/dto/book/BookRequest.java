@@ -1,4 +1,4 @@
-package com.miniproject.library.dto;
+package com.miniproject.library.dto.book;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

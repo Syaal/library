@@ -1,4 +1,4 @@
-package com.miniproject.library.dto;
+package com.miniproject.library.dto.register;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginResponse {
+public class RegisterResponse {
+    private Integer id;
     private String nama;
-    private String role;
+    private String alamat;
+    private String email;
     private String token;
 }
