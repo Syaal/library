@@ -17,6 +17,6 @@ public class RegisterRequest {
     private String alamat;
     @NotBlank(message = "Masukkan email")
     private String email;
-    @NotBlank(message = "Masukkan Nama")
+    @NotBlank(message = "Masukkan Password")
     private String password;
 }
