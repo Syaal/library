@@ -13,4 +13,5 @@ public class ListBook {
     private BorrowBook borrowBook;
     @ManyToOne
     private Book book;
+    private String status;
 }
