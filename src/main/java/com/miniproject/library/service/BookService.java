@@ -28,7 +28,7 @@ public class BookService {
         return mapper.map(book,BookResponse.class);
     }
 
-    public List<BookResponse> getAllBook(BookRequest bookRequest){
+    public List<BookResponse> getAllBook(){
         List<Book> bookList = bookRepository.findAll();
         return bookList.stream().map((book) -> mapper.map(book,BookResponse.class)).collect(Collectors.toList());
     }
