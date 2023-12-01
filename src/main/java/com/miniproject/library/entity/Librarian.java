@@ -16,6 +16,6 @@ public class Librarian {
     private String email;
     private String password;
     private String gender;
-    @OneToMany(mappedBy = "librarian`")
+    @OneToMany(mappedBy = "librarian")
     private Set<Book> books;
 }
