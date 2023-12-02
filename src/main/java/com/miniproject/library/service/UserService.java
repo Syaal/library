@@ -4,6 +4,7 @@ import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
 import com.miniproject.library.entity.User;
 import com.miniproject.library.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -37,21 +38,15 @@ public class UserService {
     }
 
     public void deleteById(Integer id) {
-        try {
-            Optional<User> userOptional = userRepository.findById(id);
+        Optional<User> userOptional = userRepository.findById(id);
 
-            if (userOptional.isPresent()) {
-                userRepository.deleteById(id);
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pengguna tidak ditemukan");
-            }
-        } catch (Exception e) {
-            // Handle other exceptions, log them, or rethrow as needed
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting user", e);
+        if (userOptional.isPresent()) {
+            userRepository.deleteById(id);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pengguna tidak ditemukan");
         }
     }
-
-    public UserResponse updateById(Integer id, UserRequest userRequest) {
+    public UserResponse updateById(Integer id,@Valid UserRequest userRequest) {
         Optional<User> userOptional = userRepository.findById(id);
 
         if (userOptional.isPresent()) {
