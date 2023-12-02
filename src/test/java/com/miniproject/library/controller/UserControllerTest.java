@@ -1,25 +1,30 @@
 package com.miniproject.library.controller;
 
+import com.miniproject.library.dto.register.RegisterRequest;
 import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
 import com.miniproject.library.entity.User;
+import com.miniproject.library.service.LoginService;
+import com.miniproject.library.service.RegisterService;
 import com.miniproject.library.service.UserService;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import com.miniproject.library.util.JwtToken;
+import jakarta.validation.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +38,11 @@ class UserControllerTest {
 
     @Mock
     UserService userService;
+
+    @Mock
+    LoginService loginService;
+    @Mock
+    RegisterService registerService;
 
     @Mock
     ModelMapper mapper;
@@ -102,4 +112,65 @@ class UserControllerTest {
 
         verify(userService, times(1)).deleteById(getUser().getId());
     }
+
+    @Test
+    void testUpdateUserWithBlankUsername() {
+        // Given
+        Integer userId = 1;
+        UserRequest requestWithBlankUsername = new UserRequest();
+        requestWithBlankUsername.setUsername("");
+        requestWithBlankUsername.setPassword("admin");
+
+        // Mocking the behavior of the service
+        when(userService.updateById(eq(userId), any()))
+                .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be blank"));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userController.updateUser(userId, requestWithBlankUsername));
+
+        // Then
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Username cannot be blank", exception.getReason());
+
+        // Verify that the service method was called
+        verify(userService, times(1)).updateById(eq(userId), any());
+    }
+
+    @Test
+    void testLogin() {
+        UserRequest userRequest = new UserRequest();
+        userRequest.setUsername("aku anak dewa coding");
+        userRequest.setPassword("admin");
+        User expectedUser = getUser();
+        expectedUser.setToken(JwtToken.getToken(userRequest));
+
+        when(loginService.login(any())).thenReturn(expectedUser);
+        ResponseEntity<User> responseEntity = userController.login(userRequest);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(expectedUser, responseEntity.getBody());
+
+        // Verify that loginService.login is called once with the provided userRequest
+        verify(loginService, times(1)).login(eq(userRequest));
+    }
+
+    @Test
+    void testRegister() {
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setUsername("aku anak gacor");
+        registerRequest.setPassword("admin");
+
+        User expectedUser = new User();
+        expectedUser.setId(1);
+        expectedUser.setUsername("aku anak gacor");
+        expectedUser.setPassword("admin");
+
+        when(registerService.register(registerRequest)).thenReturn(expectedUser);
+        ResponseEntity<User> responseEntity = userController.register(registerRequest);
+
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertEquals(expectedUser, responseEntity.getBody());
+
+        verify(registerService, times(1)).register(eq(registerRequest));
+    }
+
 }
