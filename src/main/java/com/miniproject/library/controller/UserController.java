@@ -1,10 +1,14 @@
 package com.miniproject.library.controller;
 
+import com.miniproject.library.dto.register.RegisterRequest;
 import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
+import com.miniproject.library.entity.User;
+import com.miniproject.library.service.RegisterService;
 import com.miniproject.library.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +20,8 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+
+    private final RegisterService registerService;
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(@Valid @PathVariable Integer id, @RequestBody UserRequest userRequest) {
@@ -38,5 +44,11 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable Integer id){
         userService.deleteById(id);
         return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest request){
+        User response = registerService.register(request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

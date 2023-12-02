@@ -28,7 +28,7 @@ public class ListBookService {
             ListBook book = listBookOptional.get();
             return mapper.map(book, ListBookResponse.class);
         }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "List tidak ditemukan");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"List Not Found");
         }
     }
 }
