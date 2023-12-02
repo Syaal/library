@@ -27,7 +27,7 @@ public class UserController {
     private final LoginService loginService;
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@Valid @PathVariable Integer id, @RequestBody UserRequest userRequest) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Integer id, @Valid @RequestBody UserRequest userRequest) {
             UserResponse updatedUser = userService.updateById(id, userRequest);
             return ResponseEntity.ok(updatedUser);
     }
