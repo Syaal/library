@@ -22,7 +22,7 @@ public class JwtToken {
                 .setAudience("users")
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS512, key)
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
 }

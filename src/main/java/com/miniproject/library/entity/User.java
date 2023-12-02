@@ -14,7 +14,6 @@ public class User {
     private String username;
     @JsonIgnore
     private String password;
-    @Column(length = 500)
     private String token;
     @OneToOne
     @JoinColumn(name = "visitor_id")
