@@ -15,5 +15,4 @@ public class UserRequest {
     private String username;
     @NotBlank(message = "Masukkan Password")
     private String password;
-    private String token;
 }
