@@ -107,9 +107,16 @@
 				</executions>
 				<configuration>
 					<excludes>
-<!--						<exclude>**/response/*</exclude>-->
-<!--						<exclude>**/entity/*</exclude>-->
-<!--						<exclude>**/dto/*</exclude>-->
+						<exclude>**/entity/*</exclude>
+						<exclude>**/dto/book/*</exclude>
+						<exclude>**/dto/borrow/*</exclude>
+						<exclude>**/dto/librarian/*</exclude>
+						<exclude>**/dto/ListBook/*</exclude>
+						<exclude>**/dto/login/*</exclude>
+						<exclude>**/dto/register/*</exclude>
+						<exclude>**/dto/returnbook/*</exclude>
+						<exclude>**/dto/user/*</exclude>
+						<exclude>**/dto/visitor/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
