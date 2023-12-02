@@ -22,17 +22,20 @@ public class BookService {
     private final BookRepository bookRepository;
     private final ModelMapper mapper = new ModelMapper();
 
+    //create Book
     public BookResponse createBook(BookRequest bookRequest){
         Book book = mapper.map(bookRequest, Book.class);
 
         return mapper.map(book,BookResponse.class);
     }
 
+    //get all book
     public List<BookResponse> getAllBook(){
         List<Book> bookList = bookRepository.findAll();
         return bookList.stream().map((book) -> mapper.map(book,BookResponse.class)).collect(Collectors.toList());
     }
 
+    //get book by id
     public BookResponse getBookById(Integer id){
         Optional<Book> bookOptional = bookRepository.findById(id);
         if (bookOptional.isPresent()){
@@ -43,6 +46,7 @@ public class BookService {
         }
     }
 
+    //update book
     public BookResponse updateBook(Integer id, BookRequest bookRequest){
         Optional<Book> bookOptional = bookRepository.findById(id);
         if (bookOptional.isPresent()){
@@ -54,6 +58,7 @@ public class BookService {
         }
     }
 
+    //delete book
     public void deleteById(Integer id){
         try {
             Optional<Book> bookOptional = bookRepository.findById(id);
