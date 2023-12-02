@@ -15,12 +15,12 @@ import java.util.List;
 @Builder
 public class BorrowResponse {
     private Integer id;
-    private Date peminjaman;
+    private Date borrowDate;
     //nama user dan id atau bisa langung user aja
-    private String nama;
+    private String name;
     private Integer userId;
     private List<Book> bookList;
 
-    private Date pengembalian;
+    private Date dueDate;
 
 }

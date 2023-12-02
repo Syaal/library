@@ -17,6 +17,6 @@ public class ReturnResponse {
     private Integer id;
     private List<Book> bookList;
 
-    private Date pengembalian;
-    private BigDecimal denda;
+    private Date returnDate;
+    private BigDecimal penalty;
 }
