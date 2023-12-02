@@ -13,6 +13,6 @@ import java.util.List;
 @Builder
 public class ReturnRequest {
     @NotBlank(message = "Masukkan Nama")
-    private String nama;
+    private String name;
     private List<Integer> bookList;
 }

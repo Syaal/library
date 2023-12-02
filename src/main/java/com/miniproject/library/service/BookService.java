@@ -25,6 +25,7 @@ public class BookService {
     //create Book
     public BookResponse createBook(BookRequest bookRequest){
         Book book = mapper.map(bookRequest, Book.class);
+        bookRepository.save(book);
 
         return mapper.map(book,BookResponse.class);
     }
@@ -52,6 +53,7 @@ public class BookService {
         if (bookOptional.isPresent()){
             Book book = bookOptional.get();
             mapper.map(bookRequest,book);
+            bookRepository.save(book);
             return mapper.map(book,BookResponse.class);
         }else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");

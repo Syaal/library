@@ -1,4 +1,4 @@
-package com.miniproject.library.controller.ExceptionHandler;
+package com.miniproject.library.ExceptionHandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -4,6 +4,7 @@ import com.miniproject.library.dto.register.RegisterRequest;
 import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
 import com.miniproject.library.entity.User;
+import com.miniproject.library.service.LoginService;
 import com.miniproject.library.service.RegisterService;
 import com.miniproject.library.service.UserService;
 import jakarta.validation.Valid;
@@ -22,6 +23,8 @@ public class UserController {
     private final UserService userService;
 
     private final RegisterService registerService;
+
+    private final LoginService loginService;
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(@Valid @PathVariable Integer id, @RequestBody UserRequest userRequest) {
@@ -50,5 +53,11 @@ public class UserController {
     public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest request){
         User response = registerService.register(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@Valid @RequestBody UserRequest request){
+        User response = loginService.login(request);
+        return ResponseEntity.ok(response);
     }
 }
