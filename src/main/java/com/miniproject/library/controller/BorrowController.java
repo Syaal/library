@@ -2,6 +2,7 @@ package com.miniproject.library.controller;
 
 import com.miniproject.library.dto.borrow.BorrowRequest;
 import com.miniproject.library.dto.borrow.BorrowResponse;
+import com.miniproject.library.entity.BorrowBook;
 import com.miniproject.library.service.BorrowService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +32,8 @@ public class BorrowController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BorrowResponse> getBorrowById(@PathVariable Integer id) {
-        BorrowResponse borrowResponse = borrowService.getBorrowById(id);
+    public ResponseEntity<BorrowBook> getBorrowById(@PathVariable Integer id) {
+        BorrowBook borrowResponse = borrowService.getBorrowById(id);
         return ResponseEntity.ok(borrowResponse);
     }
 }

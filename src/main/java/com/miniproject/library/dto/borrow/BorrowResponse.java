@@ -1,5 +1,6 @@
 package com.miniproject.library.dto.borrow;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miniproject.library.entity.Book;
 import com.miniproject.library.entity.User;
 import lombok.AllArgsConstructor;
@@ -15,12 +16,11 @@ import java.util.List;
 @Builder
 public class BorrowResponse {
     private Integer id;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date borrowDate;
-    //nama user dan id atau bisa langung user aja
-    private String name;
-    private Integer userId;
-    private List<Book> bookList;
-
+    private Integer visitorId;
+    private String visitorName;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date dueDate;
-
+    private List<Book> bookList;
 }
