@@ -24,7 +24,7 @@ public class UserService {
 
     public List<UserResponse>getAll(){
         List<User> userList=userRepository.findAll();
-        return userList.stream().map((user) -> mapper.map(user,UserResponse.class)).collect(Collectors.toList());
+        return userList.stream().map(user -> mapper.map(user,UserResponse.class)).collect(Collectors.toList());
     }
 
     public UserResponse getById(Integer id) {
