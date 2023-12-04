@@ -33,7 +33,7 @@ public class BookService {
     //get all book
     public List<BookResponse> getAllBook(){
         List<Book> bookList = bookRepository.findAll();
-        return bookList.stream().map((book) -> mapper.map(book,BookResponse.class)).collect(Collectors.toList());
+        return bookList.stream().map(book -> mapper.map(book,BookResponse.class)).toList();
     }
 
     //get book by id

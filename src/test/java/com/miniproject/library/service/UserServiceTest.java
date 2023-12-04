@@ -30,9 +30,6 @@ class UserServiceTest {
     @Mock
     UserRepository userRepository;
 
-    @Mock
-    ModelMapper mapper;
-
     private User getUser(){
         User user = new User();
         user.setId(1);
@@ -92,6 +89,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         userService.deleteById(userId);
         verify(userRepository, times(1)).deleteById(userId);
+
     }
 
     @Test
@@ -145,19 +143,16 @@ class UserServiceTest {
 
     @Test
     void testUpdateByIdUserNotFound() {
-        // Arrange
         Integer userId = 1;
         UserRequest userRequest = new UserRequest();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // Act and Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> userService.updateById(userId, userRequest));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertEquals("Pengguna tidak ditemukan", exception.getReason());
 
-        // Verify that userRepository.findById is called once
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).save(any());
     }
