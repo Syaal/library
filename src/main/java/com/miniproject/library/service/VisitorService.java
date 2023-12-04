@@ -43,7 +43,7 @@ public class VisitorService {
     //get all visitor
     public List<Visitor> getAllVisitor(){
         List<Visitor> visitorList = visitorRepository.findAll();
-        return visitorList.stream().map(visitor -> mapper.map(visitor, Visitor.class))
-                .toList();
+        return visitorList.stream().map(visitor ->
+                mapper.map(visitor, Visitor.class)).toList();
     }
 }
