@@ -25,8 +25,8 @@ public class BookService {
     //create Book
     public BookResponse createBook(BookRequest bookRequest){
         Book book = mapper.map(bookRequest, Book.class);
+        book.setRead(0);
         bookRepository.save(book);
-
         return mapper.map(book,BookResponse.class);
     }
 
@@ -43,7 +43,7 @@ public class BookService {
             Book book = bookOptional.get();
             return mapper.map(book, BookResponse.class);
         }else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid book");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
         }
     }
 
@@ -62,15 +62,11 @@ public class BookService {
 
     //delete book
     public void deleteById(Integer id){
-        try {
-            Optional<Book> bookOptional = bookRepository.findById(id);
-            if (bookOptional.isPresent()){
-                bookRepository.deleteById(id);
-            }else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
-            }
-        }catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while deleting Book", e);
+        Optional<Book> bookOptional = bookRepository.findById(id);
+        if (bookOptional.isPresent()){
+            bookRepository.deleteById(id);
+        }else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
         }
     }
 }
