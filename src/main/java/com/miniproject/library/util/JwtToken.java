@@ -1,7 +1,6 @@
 package com.miniproject.library.util;
 
 import com.miniproject.library.dto.user.UserRequest;
-import com.miniproject.library.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
