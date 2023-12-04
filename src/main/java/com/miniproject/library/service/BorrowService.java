@@ -31,7 +31,7 @@ public class BorrowService {
     //get all borrow
     public List<BorrowResponse> getAllBorrow(){
         List<BorrowBook> borrowBooks = borrowRepository.findAll();
-        return borrowBooks.stream().map(borrowBook -> mapper.map(borrowBooks,BorrowResponse.class)).toList();
+        return borrowBooks.stream().map(borrow -> mapper.map(borrow,BorrowResponse.class)).toList();
     }
 
     public BorrowResponse getBorrowById(Integer id){

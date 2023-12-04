@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
@@ -23,8 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,8 +42,7 @@ class UserControllerTest {
     @Mock
     RegisterService registerService;
 
-    @Mock
-    ModelMapper mapper;
+    private final ModelMapper mapper = new ModelMapper();
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = factory.getValidator();
     @BeforeEach
@@ -61,18 +58,23 @@ class UserControllerTest {
         return user;
     }
     private List<User> userList(){
+        List<User> userList = new ArrayList<>();
         User user2 = new User();
         user2.setId(2);
         user2.setUsername("aku dewa coding");
         user2.setPassword("admin");
-        return Arrays.asList(getUser(), user2);
+        userList.add(user2);
+        userList.add(getUser());
+        return userList;
     }
     @Test
     void updateUser() {
         User user = getUser();
         UserRequest userRequest = new UserRequest();
         userRequest.setUsername("aku anak gacor");
-        userRequest.setPassword("admin");
+        userRequest.setPassword("123");
+        user.setUsername(userRequest.getUsername());
+        userRequest.setPassword(userRequest.getPassword());
         UserResponse expectedUpdatedUser = mapper.map(user, UserResponse.class);
         when(userService.updateById(1, userRequest)).thenReturn(expectedUpdatedUser);
         ResponseEntity<UserResponse> responseEntity = userController.updateUser(1,userRequest);
@@ -84,18 +86,18 @@ class UserControllerTest {
 
     @Test
     void getAllUsers() {
-        List<UserResponse> expectedUserResponses = userList().stream().map(user -> mapper.map(user,UserResponse.class)).collect(Collectors.toList());
+        List<UserResponse> response = userList().stream().map(user -> mapper.map(user,UserResponse.class)).collect(Collectors.toList());
 
-        when(userService.getAll()).thenReturn(expectedUserResponses);
+        when(userService.getAll()).thenReturn(response);
 
         ResponseEntity<List<UserResponse>> responseEntity = userController.getAllUsers();
         Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        Assertions.assertEquals(expectedUserResponses, responseEntity.getBody());
+        Assertions.assertIterableEquals(response, responseEntity.getBody());
     }
 
     @Test
     void getUserById() {
-        UserResponse expectedUserResponse = new UserResponse();
+        UserResponse expectedUserResponse = mapper.map(getUser(),UserResponse.class);
         when(userService.getById(1)).thenReturn(expectedUserResponse);
         ResponseEntity<UserResponse> responseEntity = userController.getUserById(1);
         Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -150,7 +152,7 @@ class UserControllerTest {
         assertEquals(expectedUser, responseEntity.getBody());
 
         // Verify that loginService.login is called once with the provided userRequest
-        verify(loginService, times(1)).login(eq(userRequest));
+        verify(loginService, times(1)).login((userRequest));
     }
 
     @Test
@@ -167,10 +169,10 @@ class UserControllerTest {
         when(registerService.register(registerRequest)).thenReturn(expectedUser);
         ResponseEntity<User> responseEntity = userController.register(registerRequest);
 
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-        assertEquals(expectedUser, responseEntity.getBody());
+        Assertions.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        Assertions.assertEquals(expectedUser, responseEntity.getBody());
 
-        verify(registerService, times(1)).register(eq(registerRequest));
+        verify(registerService, times(1)).register((registerRequest));
     }
 
 }
