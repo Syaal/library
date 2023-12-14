@@ -1,5 +1,7 @@
 package com.miniproject.library.controller;
 
+import com.miniproject.library.dto.login.LoginRequest;
+import com.miniproject.library.dto.login.LoginResponse;
 import com.miniproject.library.dto.register.RegisterRequest;
 import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
@@ -140,23 +143,25 @@ class UserControllerTest {
 
     @Test
     void testLogin() {
-        UserRequest userRequest = new UserRequest();
+        LoginRequest userRequest = new LoginRequest();
         userRequest.setUsername("aku anak dewa coding");
         userRequest.setPassword("admin");
         User expectedUser = getUser();
-        expectedUser.setToken(JwtToken.getToken(userRequest));
+        LoginResponse expectedResponse = mapper.map(expectedUser, LoginResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + expectedResponse.getToken());
 
-        when(loginService.login(any())).thenReturn(expectedUser);
-        ResponseEntity<User> responseEntity = userController.login(userRequest);
+        when(loginService.login(any())).thenReturn(expectedResponse);
+        ResponseEntity<LoginResponse> responseEntity = userController.login(userRequest,headers);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(expectedUser, responseEntity.getBody());
+        assertEquals(expectedResponse, responseEntity.getBody());
 
         // Verify that loginService.login is called once with the provided userRequest
         verify(loginService, times(1)).login((userRequest));
     }
 
     @Test
-    void testRegister() {
+    void testRegisterVisitor() {
         RegisterRequest registerRequest = new RegisterRequest();
         registerRequest.setUsername("aku anak gacor");
         registerRequest.setPassword("admin");
@@ -166,13 +171,14 @@ class UserControllerTest {
         expectedUser.setUsername("aku anak gacor");
         expectedUser.setPassword("admin");
 
-        when(registerService.register(registerRequest)).thenReturn(expectedUser);
-        ResponseEntity<User> responseEntity = userController.register(registerRequest);
+        String role="VISITOR";
+        when(registerService.register(registerRequest,role)).thenReturn(expectedUser);
+        ResponseEntity<User> responseEntity = userController.register(registerRequest,role);
 
         Assertions.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
         Assertions.assertEquals(expectedUser, responseEntity.getBody());
 
-        verify(registerService, times(1)).register((registerRequest));
+        verify(registerService, times(1)).register(registerRequest,role);
     }
 
 }

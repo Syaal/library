@@ -60,5 +60,4 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pengguna tidak ditemukan");
         }
     }
-
 }

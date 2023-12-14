@@ -18,7 +18,6 @@ target/
 *.iws
 *.iml
 *.ipr
-*.properties
 
 ### NetBeans ###
 /nbproject/private/
@@ -32,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+# Sonarlint plugin
+# https://plugins.jetbrains.com/plugin/7973-sonarlint
+.idea/**/sonarlint/
+
+# SonarQube Plugin
+# https://plugins.jetbrains.com/plugin/7238-sonarqube-community-plugin
+.idea/**/sonarIssues.xml
+# SonarLint plugin
+.idea/sonarlint/
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.settings/
+!org.jacoco.core/.settings/
+!org.jacoco.core.test/.settings/
+org.jacoco.agent/src/jacocoagent.jar

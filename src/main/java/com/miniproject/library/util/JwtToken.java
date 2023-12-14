@@ -1,27 +1,41 @@
 package com.miniproject.library.util;
 
-import com.miniproject.library.dto.user.UserRequest;
+import com.miniproject.library.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-import java.security.Key;
 import java.util.Date;
-
+@Component
+@RequiredArgsConstructor
 public class JwtToken {
-    private JwtToken(){
-    }
-    public static String getToken(UserRequest request){
+    private static final String key = "MyKey";
+    public static String getToken(User user){
+        Claims claims = Jwts.claims().setSubject(user.getUsername());
+        claims.put("username",user.getUsername());
+        claims.put("roles",user.getRole().name());
         long nowMilis = System.currentTimeMillis();
         Date now = new Date(nowMilis);
-        Date expireDate = new Date(nowMilis);
-        Key key = MacProvider.generateKey();
+        Date expireDate = new Date(nowMilis+36000000);
         return Jwts.builder()
-                .setSubject(String.valueOf(request))
-                .setAudience("users")
+                .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
+
+    public static Claims getAllClaimsFromToken(String jwtToken) {
+        return Jwts.parser().setSigningKey(key).parseClaimsJws(jwtToken).getBody();
+    }
+    public static String getUsernameFromToken(String token) {
+        final Claims claims = getAllClaimsFromToken(token);
+        return claims.getSubject();
+    }
+    private String getRole(Claims claim) {
+        return (String) claim.get("roles");
+    }
+
 }
