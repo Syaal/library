@@ -30,12 +30,5 @@ public class JwtToken {
     public static Claims getAllClaimsFromToken(String jwtToken) {
         return Jwts.parser().setSigningKey(key).parseClaimsJws(jwtToken).getBody();
     }
-    public static String getUsernameFromToken(String token) {
-        final Claims claims = getAllClaimsFromToken(token);
-        return claims.getSubject();
-    }
-    private String getRole(Claims claim) {
-        return (String) claim.get("roles");
-    }
 
 }

@@ -1,6 +1,5 @@
 package com.miniproject.library.controller;
 
-import com.miniproject.library.dto.borrow.BorrowResponse;
 import com.miniproject.library.dto.returnbook.ReturnRequest;
 import com.miniproject.library.dto.returnbook.ReturnResponse;
 import com.miniproject.library.service.ReturnService;

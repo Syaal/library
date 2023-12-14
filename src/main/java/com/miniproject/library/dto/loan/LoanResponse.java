@@ -15,5 +15,5 @@ public class LoanResponse {
     private Date dateReturn;
     private Date dueBorrow;
     private Integer bookCartId;
-    private Double overdueFine;
+    private Integer overdueFine;
 }

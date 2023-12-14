@@ -2,8 +2,10 @@ package com.miniproject.library.service;
 
 import com.miniproject.library.dto.penalty.PenaltyRequest;
 import com.miniproject.library.dto.penalty.PenaltyResponse;
+import com.miniproject.library.entity.Book;
 import com.miniproject.library.entity.Loan;
 import com.miniproject.library.entity.Penalty;
+import com.miniproject.library.repository.BookRepository;
 import com.miniproject.library.repository.LoanRepository;
 import com.miniproject.library.repository.PenaltyRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,36 +21,93 @@ import java.util.List;
 public class PenaltyService {
     private final PenaltyRepository penaltyRepository;
     private final LoanRepository loanRepository;
+    private final BookRepository bookRepository;
+    private final LoanService loanService;
 
     public List<Penalty> getAllPenalties() {
         return penaltyRepository.findAll();
     }
 
-    public PenaltyResponse applyPenalty(PenaltyRequest penaltyRequest, Integer loanId) {
-        // Validate and process penalty logic
-        if (penaltyRequest.getAmount() <= 0) {
-            throw new IllegalArgumentException("Penalty amount must be greater than zero.");
+    public PenaltyResponse processPenaltyForLateReturnAndDamage(PenaltyRequest penaltyRequest, Integer loanId, boolean isDamaged, boolean isLost) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan with ID " + loanId + " not found"));
+
+        if (loan.getDateReturn() == null) {
+            // Hanya berikan denda jika buku belum dikembalikan
+            Integer overdueFine = calculateOverdueFine(loan);
+
+            if (overdueFine > 0) {
+                Penalty penalty = new Penalty();
+                penalty.setLoan(loan);
+                penalty.setCost(overdueFine);
+                penaltyRepository.save(penalty);
+
+                return PenaltyResponse.builder()
+                        .id(penalty.getId())
+                        .loanId(loan.getId())
+                        .cost(penalty.getCost())
+                        .build();
+            }
+        }
+        if (isDamaged || isLost) {
+            // Handle logic for damaged or lost books
+            List<Book> returnedBooks = loan.getBookCarts().getBook();
+
+            if (isDamaged) {
+                replaceDamagedBooks(returnedBooks);
+            }
+
+            if (isLost) {
+                replaceLostBooks(returnedBooks);
+            }
+            loanService.updateStockAndRead(returnedBooks, false);
+        }
+        return null;
+    }
+
+    private Integer calculateOverdueFine(Loan loan) {
+        Date currentDate = new Date();
+        Date dueDate = loan.getDueBorrow();
+        Date returnDate = loan.getDateReturn();
+
+        int maxOverdueMillis = 7 * 24 * 60 * 60 * 1000; // Misalnya, batas 7 hari
+
+        if (returnDate.after(dueDate) && currentDate.after(dueDate) && currentDate.before(returnDate)) {
+            long overdueMillis = Math.min(returnDate.getTime(), currentDate.getTime()) - dueDate.getTime();
+            long overdueDays = overdueMillis / (24 * 60 * 60 * 1000);
+            Integer fineRate = 1;
+            return Math.toIntExact(Math.min(overdueDays, maxOverdueMillis / (24 * 60 * 60 * 1000)) * fineRate);
         }
 
-        // Retrieve the loan based on loanId
-        Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan with ID " + loanId + " not found."));
+        return 0;
+    }
 
-        // Save the penalty to the database
-        Penalty penalty = new Penalty();
-        penalty.setAmount(penaltyRequest.getAmount());
-        penalty.setLoan(loan); // Associate the penalty with the loan
-        // Set other relevant fields from the request
-        // ...
+    private void replaceDamagedBooks(List<Book> returnedBooks) {
+        for (Book damagedBook : returnedBooks) {
+            damagedBook.setActive(false);
+            Book newCopy = createNewCopy(damagedBook);
+            bookRepository.save(newCopy);
+        }
+    }
 
-        penaltyRepository.save(penalty);
+    private void replaceLostBooks(List<Book> returnedBooks) {
+        for (Book lostBook : returnedBooks) {
+            lostBook.setActive(false);
+            Book newCopy = createNewCopy(lostBook);
+            bookRepository.save(newCopy);
+        }
+    }
 
-        return PenaltyResponse.builder()
-                .id(penalty.getId())
-                .amount(penalty.getAmount())
-                .loanId(loan.getId()) // Include the associated loan ID in the response
-                // Include other relevant information in the response
-                .build();
+    private Book createNewCopy(Book originalBook) {
+        Book newCopy = new Book();
+        newCopy.setAuthor(originalBook.getAuthor());
+        newCopy.setTitle(originalBook.getTitle());
+        newCopy.setPublisher(originalBook.getPublisher());
+        newCopy.setSummary(originalBook.getSummary());
+        newCopy.setPublicationDate(originalBook.getPublicationDate());
+        newCopy.setStock(1);
+
+        return newCopy;
     }
 
     public PenaltyResponse getPenaltyById(Integer id) {
@@ -57,7 +116,7 @@ public class PenaltyService {
 
         return PenaltyResponse.builder()
                 .id(penalty.getId())
-                .amount(penalty.getAmount())
+                .cost(penalty.getCost())
                 .loanId(penalty.getLoan().getId()) // Include the associated loan ID in the response
                 // Include other relevant information in the response
                 .build();
@@ -76,31 +135,13 @@ public class PenaltyService {
         Loan loan = loanRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan with ID " + id + " Not Found"));
 
-        double overdueFine = calculateOverdueFine(loan);
+        Integer overdueFine = calculateOverdueFine(loan);
 
         Penalty penalty = new Penalty();
         penalty.setLoan(loan);
-        penalty.setAmount(overdueFine);
+        penalty.setCost(overdueFine);
 
         return penaltyRepository.save(penalty);
     }
-
-
-    // Implementasi logika perhitungan denda sesuai kebutuhan
-    private double calculateOverdueFine(Loan loan) {
-        // Contoh logika perhitungan denda
-        // Anda dapat menyesuaikan ini sesuai dengan aturan bisnis Anda
-        Date currentDate = new Date();
-        Date dueDate = loan.getDueBorrow();
-
-        if (currentDate.after(dueDate)) {
-            long overdueMillis = currentDate.getTime() - dueDate.getTime();
-            long overdueDays = overdueMillis / (24 * 60 * 60 * 1000);
-            // Set tarif denda (anda dapat menyesuaikan ini)
-            double fineRate = 0.50;
-            return overdueDays * fineRate;
-        }
-
-        return 0.0; // Tidak ada denda keterlambatan
-    }
 }
+

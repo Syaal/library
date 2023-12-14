@@ -10,8 +10,9 @@ public class Penalty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @OneToOne
+    private String name;
+    private String description;
+    private Integer cost;
+    @ManyToOne
     private Loan loan;
-    private double amount;
 }
