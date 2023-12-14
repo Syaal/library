@@ -1,24 +1,26 @@
 package com.miniproject.library.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
 
 @Entity
+@Table(name = "book")
 @Data
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String title;
     private String author;
+    private String title;
     private String publisher;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date publicationDate;
-    private Integer stock;
+    private int stock;
+    private String summary;
+    private Integer wishlist;
     private Integer read;
+    private boolean active;  // Menandakan apakah buku aktif atau tidak (ketersediaan)
     @ManyToOne
-    private Librarian librarian;
+    private Category category;
 }

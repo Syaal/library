@@ -1,5 +1,7 @@
 package com.miniproject.library.controller;
 
+import com.miniproject.library.dto.login.LoginRequest;
+import com.miniproject.library.dto.login.LoginResponse;
 import com.miniproject.library.dto.register.RegisterRequest;
 import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
@@ -9,6 +11,7 @@ import com.miniproject.library.service.RegisterService;
 import com.miniproject.library.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
@@ -49,15 +51,16 @@ public class UserController {
         return ResponseEntity.ok("User deleted successfully");
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest request){
-        User response = registerService.register(request);
+    @PostMapping("/register/{role}")
+    public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest request,@PathVariable String role){
+        User response = registerService.register(request,role);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@Valid @RequestBody UserRequest request){
-        User response = loginService.login(request);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, @RequestHeader HttpHeaders headers ){
+        LoginResponse response = loginService.login(request);
+        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + response.getToken());
         return ResponseEntity.ok(response);
     }
 }

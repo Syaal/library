@@ -4,6 +4,7 @@ import com.miniproject.library.dto.librarian.LibrarianRequest;
 import com.miniproject.library.dto.librarian.LibrarianResponse;
 import com.miniproject.library.entity.Librarian;
 import com.miniproject.library.service.LibrarianService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,28 +12,35 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
-@RequestMapping("/librarian")
 @RequiredArgsConstructor
+@RequestMapping("/librarian")
 public class LibrarianController {
-
     private final LibrarianService librarianService;
 
-    @PostMapping()
-    public ResponseEntity<LibrarianResponse> createLibrarian(@RequestBody LibrarianRequest request){
-        LibrarianResponse response = librarianService.createLibrarian(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    @PutMapping("/{id}")
+    public ResponseEntity<LibrarianResponse> updateLibrarian(@PathVariable Integer id, @Valid
+    @RequestBody LibrarianRequest request){
+        LibrarianResponse librarianResponse = librarianService.updateLibrarian(request, id);
+        return ResponseEntity.ok(librarianResponse);
     }
 
-    @GetMapping()
-    public ResponseEntity<Librarian> getLibrarianById(@RequestParam("id") Integer id){
-        Librarian response = librarianService.getByIdLibrarian(id);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<Librarian>> getAllLibrarian(){
-        List<Librarian> response = librarianService.getAllLibrarian();
-        return ResponseEntity.ok(response);
+        List<Librarian> librarians = librarianService.getAllLibrarian();
+        return ResponseEntity.ok(librarians);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Librarian> getLibrarianById(@PathVariable Integer id){
+        Librarian librarian = librarianService.getLibrarianById(id);
+        return ResponseEntity.ok(librarian);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLibrarianById(@PathVariable Integer id){
+        librarianService.deleteLibrarianById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
-@Table(name = "Users")
+import java.util.Date;
+
+@Table(name = "users")
 @Entity
 @Data
 public class User {
@@ -14,11 +16,13 @@ public class User {
     private String username;
     @JsonIgnore
     private String password;
-    private String token;
+
     @OneToOne
-    @JoinColumn(name = "visitor_id")
-    private Visitor visitor;
+    private Anggota anggota;
+
     @OneToOne
-    @JoinColumn(name = "librarian_id")
     private Librarian librarian;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

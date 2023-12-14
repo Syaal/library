@@ -15,6 +15,4 @@ public class RegisterRequest {
     private String username;
     @NotBlank(message = "Masukkan Password")
     private String password;
-    private Integer visitorId;
-    private Integer librarianId;
 }

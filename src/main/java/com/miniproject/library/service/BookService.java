@@ -3,70 +3,93 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.book.BookRequest;
 import com.miniproject.library.dto.book.BookResponse;
 import com.miniproject.library.entity.Book;
+import com.miniproject.library.entity.Category;
 import com.miniproject.library.repository.BookRepository;
+import com.miniproject.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final ModelMapper mapper = new ModelMapper();
+    private final CategoryRepository categoryRepository;
 
-    //create Book
-    public BookResponse createBook(BookRequest bookRequest){
-        Book book = mapper.map(bookRequest, Book.class);
-        book.setRead(0);
-        bookRepository.save(book);
-        return mapper.map(book,BookResponse.class);
-    }
-
-    //get all book
-    public List<BookResponse> getAllBook(){
-        List<Book> bookList = bookRepository.findAll();
-        return bookList.stream().map(book -> mapper.map(book,BookResponse.class)).toList();
-    }
-
-    //get book by id
-    public BookResponse getBookById(Integer id){
-        Optional<Book> bookOptional = bookRepository.findById(id);
-        if (bookOptional.isPresent()){
-            Book book = bookOptional.get();
-            return mapper.map(book, BookResponse.class);
-        }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
-        }
-    }
-
-    //update book
-    public BookResponse updateBook(Integer id, BookRequest bookRequest){
-        Optional<Book> bookOptional = bookRepository.findById(id);
-        if (bookOptional.isPresent()){
-            Book book = bookOptional.get();
-            mapper.map(bookRequest,book);
+    public BookResponse addBook(BookRequest request){
+        Book book = new Book();
+        Optional<Category> optionalCategory = categoryRepository.findById(request.getCategoryId());
+        if (optionalCategory.isPresent()){
+            Category category = optionalCategory.get();
+            book.setAuthor(request.getAuthor());
+            book.setPublisher(request.getPublisher());
+            book.setPublicationDate(request.getPublicationDate());
+            book.setStock(request.getStock());
+            book.setTitle(request.getTitle());
+            book.setSummary(request.getSummary());
+            book.setCategory(category);
             bookRepository.save(book);
-            return mapper.map(book,BookResponse.class);
-        }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+
+            return BookResponse.builder()
+                    .id(book.getId())
+                    .author(book.getAuthor())
+                    .publisher(book.getPublisher())
+                    .publicationDate(book.getPublicationDate())
+                    .stock(book.getStock())
+                    .title(book.getTitle())
+                    .summary(book.getSummary())
+                    .categoryName(book.getCategory().getName())
+                    .build();
         }
+        throw new IllegalArgumentException("Category Id It's Not Exist");
     }
 
-    //delete book
-    public void deleteById(Integer id){
-        Optional<Book> bookOptional = bookRepository.findById(id);
-        if (bookOptional.isPresent()){
-            bookRepository.deleteById(id);
-        }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+    public BookResponse updateBook(BookRequest request, Integer id){
+        Optional<Book> optionalBook = bookRepository.findById(id);
+        Optional<Category> optionalCategory = categoryRepository.findById(request.getCategoryId());
+        if (optionalBook.isPresent() && optionalCategory.isPresent()){
+            Book book = optionalBook.get();
+            Category category = optionalCategory.get();
+            book.setId(id);
+            book.setAuthor(request.getAuthor());
+            book.setPublisher(request.getPublisher());
+            book.setPublicationDate(request.getPublicationDate());
+            book.setStock(request.getStock());
+            book.setTitle(request.getTitle());
+            book.setSummary(request.getSummary());
+            book.setCategory(category);
+            bookRepository.save(book);
+
+            return BookResponse.builder()
+                    .id(book.getId())
+                    .author(book.getAuthor())
+                    .publisher(book.getPublisher())
+                    .publicationDate(book.getPublicationDate())
+                    .stock(book.getStock())
+                    .title(book.getTitle())
+                    .summary(book.getSummary())
+                    .categoryName(book.getCategory().getName())
+                    .build();
         }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Book Not Found");
     }
+
+    public List<Book> getAllBook(){
+        return bookRepository.findAll();
+    }
+
+    public Book getBookByIdBook(Integer id){
+        return bookRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Book It's Not Exist!!!"));
+    }
+
+    public Book getBookByid(Integer id){
+        return bookRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book Not Found"));
+    }
+
 }
