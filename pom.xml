@@ -156,8 +156,10 @@
 							<exclude>**/dto/loan/*</exclude>
 							<exclude>**/dto/category/*</exclude>
 							<exclude>**/repository/*</exclude>
+						<exclude>**/util/*</exclude>
+						<exclude>**/LibraryApplication.java/*</exclude>
 						<exclude>**/dto/transaction/*</exclude>
-						<exclude>**/Security/*</exclude>
+						<exclude>**/security/*</exclude>
 						<exclude>**/ExceptionHandler/*</exclude>
 					</excludes>
 				</configuration>

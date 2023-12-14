@@ -22,9 +22,10 @@ public class LoanController {
 
     @PostMapping("/return/{loanId}")
     public ResponseEntity<LoanResponse> returnBooks(@PathVariable Integer id,
+                                                    @RequestParam Integer librarianId,
                                                     @RequestParam(required = false, defaultValue = "false") boolean isDamaged,
                                                     @RequestParam(required = false, defaultValue = "false") boolean isLost) {
-        LoanResponse loanResponse = loanService.returnBook(id, isDamaged, isLost);
+        LoanResponse loanResponse = loanService.returnBook(id, librarianId);
         return new ResponseEntity<>(loanResponse, HttpStatus.OK);
     }
 }

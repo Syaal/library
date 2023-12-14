@@ -27,7 +27,7 @@ public class PenaltyController {
     public ResponseEntity<PenaltyResponse> applyPenalty(@RequestBody PenaltyRequest penaltyRequest,
                                                         @PathVariable Integer loanId) {
         try {
-            PenaltyResponse penaltyResponse = penaltyService.applyPenalty(penaltyRequest, loanId);
+            PenaltyResponse penaltyResponse = penaltyService.processPenaltyForLateReturnAndDamage(penaltyRequest, loanId, penaltyRequest.isLost(), penaltyRequest.isDamaged());
             return ResponseEntity.ok(penaltyResponse);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -57,7 +57,7 @@ public class PenaltyController {
     public ResponseEntity<Boolean> checkPenalty(@PathVariable Integer id) {
         try {
             Penalty penalty = penaltyService.calculatePenalty(id);
-            return ResponseEntity.ok(penalty.getAmount() > 0);
+            return ResponseEntity.ok(penalty.getCost() > 0);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }

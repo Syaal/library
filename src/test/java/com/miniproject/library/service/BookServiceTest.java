@@ -3,171 +3,228 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.book.BookRequest;
 import com.miniproject.library.dto.book.BookResponse;
 import com.miniproject.library.entity.Book;
+import com.miniproject.library.entity.Category;
 import com.miniproject.library.repository.BookRepository;
-import org.junit.jupiter.api.Assertions;
+import com.miniproject.library.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
-
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 class BookServiceTest {
-    @InjectMocks
-    BookService bookService;
-    @Mock
-    BookRepository bookRepository;
 
-    private final ModelMapper mapper = new ModelMapper();
+    @Mock
+    private BookRepository bookRepository;
+
+    @Mock
+    private CategoryRepository categoryRepository;
+
+    @InjectMocks
+    private BookService bookService;
+    Date date = new Date(123,02,01);
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
-    private List<Book> example(){
-        List<Book> bookList = new ArrayList<>();
-        Date date = new Date(1999, Calendar.MARCH,12);
-        Book book1 = new Book();
-        book1.setId(1);
-        book1.setTitle("Metamorphosis");
-        book1.setAuthor("John");
-        book1.setStock(999);
-        book1.setPublisher("Pink Bat");
-        book1.setPublicationDate(date);
-        Book book2 = new Book();
-        book2.setId(2);
-        book2.setTitle("Oyasumi pupun");
-        book2.setAuthor("Inio Asano");
-        book2.setPublisher("VIZ Media");
-        book2.setStock(6868);
-        book2.setPublicationDate(date);
-        bookList.add(book1);
-        bookList.add(book2);
-        return bookList;
+    @Test
+    void testAddBook() {
+        BookRequest request = new BookRequest();
+        request.setAuthor("Makoto Shinkai");
+        request.setPublisher("CoMix Wave Films");
+        request.setStock(10);
+        request.setTitle("Kimi no nawa");
+        request.setSummary("CINTA BEDA DIMENSI");
+        request.setCategoryId(1);
+
+        Category category = new Category();
+        category.setId(1);
+        category.setName("Fiction");
+
+        when(categoryRepository.findById(request.getCategoryId())).thenReturn(Optional.of(category));
+
+        BookResponse response = bookService.addBook(request);
+        response.setId(1);
+
+        assertNotNull(response.getId());
+        assertNotEquals(0, response.getId());
+        assertEquals("Makoto Shinkai", response.getAuthor());
+        assertEquals("CoMix Wave Films", response.getPublisher());
+        assertEquals(10, response.getStock());
+        assertEquals("Kimi no nawa", response.getTitle());
+        assertEquals("CINTA BEDA DIMENSI", response.getSummary());
+        assertEquals("Fiction", response.getCategoryName());
+        verify(bookRepository, times(1)).save(any(Book.class));
     }
 
-//    @Test
-//    void getAllBook() {
-//        List<Book> expectedBooks = example();
-//
-//        when(bookRepository.findAll()).thenReturn(expectedBooks);
-//
-//        List<Book> result = bookService.getAllBook();
-//
-//        assertEquals(expectedBooks.size(), result.size());
-//        verify(bookRepository, times(1)).findAll();
-//    }
-//
-//    @Test
-//    void testGetBookByIdValid() {
-//        Integer bookId = 1;
-//        Book expectedBook = example().get(0);
-//
-//        when(bookRepository.findById(bookId)).thenReturn(Optional.of(expectedBook));
-//
-//        Book result = bookService.getBookByid(bookId);
-//        Assertions.assertEquals(expectedBook.getId(), result.getId());
-//        Assertions.assertEquals(expectedBook.getTitle(), result.getTitle());
-//        Assertions.assertEquals(expectedBook.getAuthor(), result.getAuthor());
-//        Assertions.assertEquals(expectedBook.getStock(), result.getStock());
-//
-//         verify(bookRepository, times(1)).findById(bookId);
-//    }
-//
-//    @Test
-//    void testGetBookByIdInvalid() {
-//        Integer invalidBookId = 999;
-//
-//        when(bookRepository.findById(invalidBookId)).thenReturn(Optional.empty());
-//
-//        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-//                () -> bookService.getBookByid(invalidBookId));
-//
-//        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-//        assertEquals("Book not found", exception.getReason());
-//
-//         verify(bookRepository, times(1)).findById(invalidBookId);
-//    }
-//
-//    @Test
-//    void testCreateBook() {
-//        BookRequest request = new BookRequest();
-//        Date date = new Date(1999, Calendar.MARCH,12);
-//        request.setTitle("Metamorphosis");
-//        request.setAuthor("John");
-//        request.setStock(999);
-//        request.setPublisher("Pink Bat");
-//        request.setPublicationDate(date);
-//        //mock repository
-//        Book savedBook = mapper.map(request, Book.class);
-//        savedBook.setId(1);
-//
-//        when(bookRepository.save(any())).thenReturn(savedBook);
-//        BookResponse expectedResponse = mapper.map(savedBook, BookResponse.class);
-//
-//        BookResponse actualResponse = bookService.addBook(request);
-//        actualResponse.setId(1);
-//
-//        assertEquals(expectedResponse, actualResponse);
-//
-//        verify(bookRepository, times(1)).save(any());
-//    }
-//
-//    @Test
-//    void testUpdateBook() {
-//        Book book = example().get(1);
-//        BookRequest request = new BookRequest();
-//        request.setTitle("Updated Title");
-//        request.setAuthor("Updated Author");
-//        request.setStock(100);
-//        request.setPublisher("Updated Publisher");
-//
-//        Book existingBook = example().get(0);
-//
-//        // Mocking the behavior of the repository
-//        when(bookRepository.findById(1)).thenReturn(Optional.of(existingBook));
-//        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//
-//        // When
-//        BookResponse updatedBookResponse = bookService.updateBook(request, existingBook.getId());
-//
-//        // Then
-//        assertEquals("Updated Title", existingBook.getTitle());
-//        assertEquals("Updated Author", existingBook.getAuthor());
-//        assertEquals(100, existingBook.getStock());
-//        assertEquals("Updated Publisher", existingBook.getPublisher());
-//        assertEquals(mapper.map(existingBook,BookResponse.class),updatedBookResponse);
-//
-//        // Verify that the repository methods were called
-//        verify(bookRepository, times(1)).findById(existingBook.getId());
-//        verify(bookRepository, times(1)).save(any(Book.class));
-//    }
-//
-//    @Test
-//    void testUpdateBookNotFound() {
-//        Integer bookId = 1;
-//        BookRequest request = new BookRequest();
-//
-//        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
-//
-//        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-//                () -> bookService.updateBook(request, bookId));
-//
-//        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-//        assertEquals("Book not found", exception.getReason());
-//
-//        verify(bookRepository, times(1)).findById(bookId);
-//        verify(bookRepository, never()).save(any(Book.class));
-//    }
+    @Test
+    void testUpdateBook() {
+        Category category = new Category();
+        category.setName("Fiction");
+        category.setId(2);
+
+        Integer bookId = 1;
+        BookRequest request = new BookRequest();
+        request.setAuthor("Makoto Shinkai");
+        request.setPublisher("Kyoto Animation");
+        request.setStock(20);
+        request.setPublicationDate(date);
+        request.setTitle("weathering with you");
+        request.setSummary("Pilih cinta atau kiamat? ya cintalah");
+        request.setCategoryId(2);
+
+        Book existingBook = new Book();
+        existingBook.setId(bookId);
+        existingBook.setCategory(new Category());
+        existingBook.setPublicationDate(date);
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(existingBook));
+        when(categoryRepository.findById(request.getCategoryId())).thenReturn(Optional.of(category));
+
+        BookResponse response = bookService.updateBook(request, bookId);
+        response.setCategoryName(category.getName());
+
+        assertNotNull(response);
+        assertEquals(bookId, response.getId());
+        assertEquals("Makoto Shinkai", response.getAuthor());
+        assertEquals("Kyoto Animation", response.getPublisher());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        assertEquals("2023-03-01", dateFormat.format(date));
+        assertEquals(20, response.getStock());
+        assertEquals("weathering with you", response.getTitle());
+        assertEquals("Pilih cinta atau kiamat? ya cintalah", response.getSummary());
+        assertEquals("Fiction", response.getCategoryName());
+        verify(bookRepository, times(1)).save(any(Book.class));
+    }
+
+    @Test
+    void testAddBookCategoryNotFound() {
+        BookRequest request = new BookRequest();
+        request.setCategoryId(1);
+
+        when(categoryRepository.findById(request.getCategoryId())).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> bookService.addBook(request));
+
+        assertEquals("Category Id It's Not Exist", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateBookNotFound() {
+        Integer bookId = 1;
+        BookRequest request = new BookRequest();
+        request.setAuthor("HAJIME ISAYAMA");
+        request.setPublisher("Mappa Studio");
+        request.setStock(10);
+        request.setTitle("Attack On Titan");
+        request.setSummary("Ending gk jelas");
+        request.setCategoryId(1);
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> bookService.updateBook(request, bookId));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Id Book Not Found", exception.getReason());
+    }
+
+    @Test
+    void testGetAllBook() {
+        Category category = new Category();
+        category.setId(1);
+        category.setName("Fiction");
+        Book sampleBook = new Book();
+        sampleBook.setId(1);
+        sampleBook.setAuthor("Makoto Shinkai");
+        sampleBook.setPublisher("Kyoto Animation");
+        sampleBook.setStock(20);
+        sampleBook.setPublicationDate(date);
+        sampleBook.setTitle("weathering with you");
+        sampleBook.setSummary("Pilih cinta atau kiamat? ya cintalah");
+        sampleBook.setCategory(category);
+        List<Book>expectedBookList = new ArrayList<Book>();
+        expectedBookList.add(sampleBook);
+
+
+        when(bookRepository.findAll()).thenReturn(expectedBookList);
+
+        List<Book> bookList = bookService.getAllBook();
+
+        assertFalse(bookList.isEmpty());
+
+
+        Book book = bookList.get(0);
+        assertNotNull(book);
+        assertEquals("Makoto Shinkai", book.getAuthor());
+        assertEquals("Kyoto Animation", book.getPublisher());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        assertEquals("2023-03-01", dateFormat.format(date));
+        assertEquals(20, book.getStock());
+        assertEquals("weathering with you", book.getTitle());
+        assertEquals("Pilih cinta atau kiamat? ya cintalah", book.getSummary());
+        assertEquals("Fiction", book.getCategory().getName());
+        verify(bookRepository, times(1)).findAll();
+
+    }
+
+    @Test
+    void testGetBookByIdBook() {
+        Category category = new Category();
+        category.setId(1);
+        category.setName("Fiction");
+
+        Integer bookId = 1;
+        Book sampleBook = new Book();
+        sampleBook.setId(bookId);
+        sampleBook.setAuthor("Makoto Shinkai");
+        sampleBook.setPublisher("Kyoto Animation");
+        sampleBook.setStock(20);
+        sampleBook.setPublicationDate(date);
+        sampleBook.setTitle("weathering with you");
+        sampleBook.setSummary("Pilih cinta atau kiamat? ya cintalah");
+        sampleBook.setCategory(category);
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(sampleBook));
+
+        Book book = bookService.getBookByIdBook(bookId);
+
+        assertNotNull(book);
+        assertEquals(bookId, book.getId());
+        assertEquals("Makoto Shinkai", book.getAuthor());
+        assertEquals("Kyoto Animation", book.getPublisher());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        assertEquals("2023-03-01", dateFormat.format(date));
+        assertEquals(20, book.getStock());
+        assertEquals("weathering with you", book.getTitle());
+        assertEquals("Pilih cinta atau kiamat? ya cintalah", book.getSummary());
+        assertEquals("Fiction", book.getCategory().getName());
+
+        verify(bookRepository, times(1)).findById(bookId);
+    }
+
+    @Test
+    void testGetBookByIdBookNotFound() {
+        Integer bookId = 1;
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> bookService.getBookByIdBook(bookId));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Id Book It's Not Exist!!!", exception.getReason());
+    }
 
 }

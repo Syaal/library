@@ -85,7 +85,7 @@ import static org.mockito.Mockito.when;
         userRequest.setPassword("testPassword");
         User user = new User();
         user.setUsername(userRequest.getUsername());
-        user.setPassword("123");
+        user.setPassword("12345");
         user.setId(1);
         user.setAnggota(new Anggota());
         user.setRole(Role.valueOf("VISITOR"));

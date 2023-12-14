@@ -29,7 +29,7 @@ public class LoanService {
     public LoanResponse borrowBooks(BookCartRequest bookCartRequest){
 
         Anggota anggota = anggotaRepository.findById(bookCartRequest.getAnggotaId()).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
         List<Book> books = bookRepository.findAllById(bookCartRequest.getBookIds());
         List<Book> availableBooks = getAvailableBook(books);
 
@@ -99,10 +99,14 @@ public class LoanService {
         return new Date(System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000));
     }
 
-    public LoanResponse returnBook(Integer id, boolean isDamaged, boolean isLost) {
+    public LoanResponse returnBook(Integer id,Integer librarianId) {
+        // Memeriksa Izin Mengembalikan Buku Pada Pustakawan
+        Librarian librarian = librarianRepository.findById(librarianId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Librarian with id " + librarianId + " not found"));
+
         // Mengembalikan buku by id Loan
         Loan loan = loanRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan with ID " + id + " Not Found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan Not Found with ID " + id));
 
         // Memeriksa apakah pinjaman sudah dikembalikan
         if (loan.getDateReturn() != null) {
@@ -119,38 +123,16 @@ public class LoanService {
         // Retrieve books in the BookCart
         List<Book> returnedBooks = bookCart.getBook();
 
-        if (isDamaged) {
-            // Handle logic for damaged book
-            replaceDamagedBooks(returnedBooks);
-        }
-
-        if (isLost) {
-            // Handle logic for lost book
-            replaceLostBooks(returnedBooks);
-        }
-        updateStockAndRead(returnedBooks, false);
-
-        double overdueFine = calculateOverdueFine(loan);
-
-        // Simpan penalty jika ada
-        if (overdueFine > 0) {
-            Penalty penalty = new Penalty();
-            penalty.setLoan(loan);
-            penalty.setAmount(overdueFine);
-            penaltyRepository.save(penalty);
-        }
-
         return LoanResponse.builder()
                 .id(loan.getId())
                 .bookCartId(bookCart.getId())
                 .dateBorrow(loan.getDateBorrow())
                 .dueBorrow(loan.getDueBorrow())
                 .dateReturn(loan.getDateReturn())
-                .overdueFine(overdueFine)
                 .build();
     }
 
-    private void updateStockAndRead(List<Book> books, boolean increaseRead) {
+    public void updateStockAndRead(List<Book> books, boolean increaseRead) {
         for (Book book : books) {
             if (increaseRead) {
                 // tambahkan stock
@@ -166,48 +148,4 @@ public class LoanService {
             bookRepository.save(book);
         }
     }
-
-    private double calculateOverdueFine(Loan loan) {
-        Date currentDate = new Date();
-        Date dueDate = loan.getDueBorrow();
-        Date returnDate = loan.getDateReturn();
-
-        if (returnDate.after(dueDate)) {
-            long overdueMillis = returnDate.getTime() - dueDate.getTime();
-            long overdueDays = overdueMillis / (24 * 60 * 60 * 1000);
-            double fineRate = 0.50;
-            return overdueDays * fineRate;
-        }
-
-        return 0.0; // No overdue fine
-    }
-    private void replaceDamagedBooks(List<Book> returnedBooks) {
-        for (Book damagedBook : returnedBooks) {
-            damagedBook.setActive(false);
-            Book newCopy = createNewCopy(damagedBook);
-            bookRepository.save(newCopy);
-        }
-    }
-
-    private void replaceLostBooks(List<Book> returnedBooks) {
-        for (Book lostBook : returnedBooks) {
-            lostBook.setActive(false);
-            Book newCopy = createNewCopy(lostBook);
-            bookRepository.save(newCopy);
-        }
-    }
-
-    private Book createNewCopy(Book originalBook) {
-        Book newCopy = new Book();
-        newCopy.setAuthor(originalBook.getAuthor());
-        newCopy.setTitle(originalBook.getTitle());
-        newCopy.setPublisher(originalBook.getPublisher());
-        newCopy.setSummary(originalBook.getSummary());
-        newCopy.setPublicationDate(originalBook.getPublicationDate());
-        newCopy.setStock(1);
-
-        return newCopy;
-    }
-
-
 }
