@@ -50,18 +50,18 @@ import static org.mockito.Mockito.when;
     @Test
      void testLogin() {
         LoginRequest userRequest = new LoginRequest();
-        userRequest.setUsername("testUser");
+        userRequest.setUsername("12345");
         userRequest.setPassword("testPassword");
 
         User user = new User();
-        user.setUsername(userRequest.getUsername());
+        user.setUsername(12345L);
         user.setPassword(loginService.passwordEncoder().encode("testPassword"));
         user.setId(1);
         user.setAnggota(new Anggota());
         user.setRole(Role.valueOf("VISITOR"));
         user.setLibrarian(null);
         Collection<? extends GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_VISITOR"));
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User("testUser", user.getPassword(), authorities);
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getUsername().toString(), user.getPassword(), authorities);
 
         // Mocking UserRepository
         when(userRepository.findByUsername(userRequest.getUsername())).thenReturn(user);
@@ -72,7 +72,7 @@ import static org.mockito.Mockito.when;
         LoginResponse response = loginService.login(userRequest);
 
         // Assertions
-        assertEquals("testUser", response.getUsername());
+        assertEquals(12345L, response.getUsername());
         assertEquals("[ROLE_VISITOR]", response.getRoles());
         assertNotNull(response.getToken());
     }
@@ -81,10 +81,10 @@ import static org.mockito.Mockito.when;
     void invalidPassword() throws Exception {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         LoginRequest userRequest = new LoginRequest();
-        userRequest.setUsername("testUser");
+        userRequest.setUsername("12345");
         userRequest.setPassword("testPassword");
         User user = new User();
-        user.setUsername(userRequest.getUsername());
+        user.setUsername(Long.valueOf(userRequest.getUsername()));
         user.setPassword("12345");
         user.setId(1);
         user.setAnggota(new Anggota());
@@ -92,7 +92,7 @@ import static org.mockito.Mockito.when;
         user.setLibrarian(null);
 
         when(userRepository.findByUsername(userRequest.getUsername())).thenReturn(user);
-        when(userDetailService.loadUserByUsername("testUser")).thenReturn(userDetails);
+        when(userDetailService.loadUserByUsername("12345")).thenReturn(userDetails);
         assertThrows(BadCredentialsException.class, () ->
                 loginService.login(userRequest)
         );

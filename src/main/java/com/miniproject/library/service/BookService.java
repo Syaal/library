@@ -21,7 +21,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
-    private final ModelMapper mapper;
+    private final ModelMapper mapper = new ModelMapper();
 
     public BookResponse addBook(BookRequest request){
         Book book = new Book();

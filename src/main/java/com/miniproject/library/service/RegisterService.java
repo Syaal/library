@@ -23,22 +23,26 @@ public class RegisterService {
 
     private final ModelMapper mapper = new ModelMapper();
 
-
-    //regis
     public User register(RegisterRequest registerRequest, String role){
         role = role.toUpperCase();
-        if (role.equals("LIBRARIAN")){
-            Librarian librarian = new Librarian();
-            librarianRepository.save(librarian);
-        }else if (role.equals("VISITOR")){
-            Anggota anggota = new Anggota();
-            anggotaRepository.save(anggota);
-        }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid role");
-        }
         User regis = mapper.map(registerRequest, User.class);
         regis.setPassword(passwordEncoder().encode(registerRequest.getPassword()));
         regis.setRole(Role.valueOf(role));
+        if (role.equals("LIBRARIAN")){
+            Librarian librarian = mapper.map(registerRequest,Librarian.class);
+            librarian.setNip(Long.valueOf(registerRequest.getUsername()));
+            librarianRepository.save(librarian);
+            regis.setLibrarian(librarian);
+            regis.setAnggota(null);
+        }else if (role.equals("VISITOR")){
+            Anggota anggota = mapper.map(registerRequest,Anggota.class);
+            anggota.setNik(Long.valueOf(registerRequest.getUsername()));
+            anggotaRepository.save(anggota);
+            regis.setLibrarian(null);
+            regis.setAnggota(anggota);
+        }
+        //save username dan pw ke tabel user
+
         userRepository.save(regis);
         return regis;
     }
@@ -46,5 +50,4 @@ public class RegisterService {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

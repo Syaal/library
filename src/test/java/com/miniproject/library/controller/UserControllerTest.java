@@ -9,8 +9,6 @@ import com.miniproject.library.entity.User;
 import com.miniproject.library.service.LoginService;
 import com.miniproject.library.service.RegisterService;
 import com.miniproject.library.service.UserService;
-import com.miniproject.library.util.JwtToken;
-import jakarta.validation.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,8 +44,6 @@ class UserControllerTest {
     RegisterService registerService;
 
     private final ModelMapper mapper = new ModelMapper();
-    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    private final Validator validator = factory.getValidator();
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -56,7 +52,7 @@ class UserControllerTest {
     private User getUser(){
         User user = new User();
         user.setId(1);
-        user.setUsername("aku anak dewa coding");
+        user.setUsername(2345L);
         user.setPassword("admin");
         return user;
     }
@@ -64,7 +60,7 @@ class UserControllerTest {
         List<User> userList = new ArrayList<>();
         User user2 = new User();
         user2.setId(2);
-        user2.setUsername("aku dewa coding");
+        user2.setUsername(2345L);
         user2.setPassword("admin");
         userList.add(user2);
         userList.add(getUser());
@@ -74,9 +70,9 @@ class UserControllerTest {
     void updateUser() {
         User user = getUser();
         UserRequest userRequest = new UserRequest();
-        userRequest.setUsername("aku anak gacor");
+        userRequest.setUsername("1234");
         userRequest.setPassword("123");
-        user.setUsername(userRequest.getUsername());
+        user.setUsername(Long.valueOf(userRequest.getUsername()));
         userRequest.setPassword(userRequest.getPassword());
         UserResponse expectedUpdatedUser = mapper.map(user, UserResponse.class);
         when(userService.updateById(1, userRequest)).thenReturn(expectedUpdatedUser);
@@ -163,12 +159,12 @@ class UserControllerTest {
     @Test
     void testRegisterVisitor() {
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("aku anak gacor");
+        registerRequest.setUsername("12345");
         registerRequest.setPassword("admin");
 
         User expectedUser = new User();
         expectedUser.setId(1);
-        expectedUser.setUsername("aku anak gacor");
+        expectedUser.setUsername(123L);
         expectedUser.setPassword("admin");
 
         String role="VISITOR";

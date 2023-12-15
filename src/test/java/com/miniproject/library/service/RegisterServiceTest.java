@@ -45,7 +45,7 @@ class RegisterServiceTest {
      void testRegisterLibrarian() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("aku Visitor");
+        registerRequest.setUsername("12345");
         registerRequest.setPassword("123");
         String role = "LIBRARIAN";
 
@@ -67,11 +67,11 @@ class RegisterServiceTest {
      void testRegisterVisitor() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("aku Visitor");
+        registerRequest.setUsername("12345");
         registerRequest.setPassword("123");
         String role = "VISITOR";
         User expectedUser = new User();
-        expectedUser.setUsername(registerRequest.getUsername());
+        expectedUser.setUsername(12345L);
         expectedUser.setRole(Role.valueOf(role));
         expectedUser.setLibrarian(null);
         expectedUser.setAnggota(new Anggota());
@@ -95,10 +95,11 @@ class RegisterServiceTest {
      void testRegisterInvalidRole() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setPassword("123");
         String role = "INVALID_ROLE";
 
         // Act and Assert
-        assertThrows(ResponseStatusException.class, () -> registerService.register(registerRequest, role));
+        assertThrows(IllegalArgumentException.class, () -> registerService.register(registerRequest, role));
         verify(librarianRepository, never()).save(any(Librarian.class));
         verify(anggotaRepository, never()).save(any(Anggota.class));
         verify(userRepository, never()).save(any(User.class));

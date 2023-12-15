@@ -29,18 +29,19 @@ class UserServiceTest {
     UserService userService;
     @Mock
     UserRepository userRepository;
+    private final ModelMapper mapper = new ModelMapper();
 
     private User getUser(){
         User user = new User();
         user.setId(1);
-        user.setUsername("aku anak dewa coding");
+        user.setUsername(123L);
         user.setPassword("admin");
         return user;
     }
     private List<User> userList(){
         User user2 = new User();
         user2.setId(2);
-        user2.setUsername("aku dewa coding");
+        user2.setUsername(231L);
         user2.setPassword("admin");
         return Arrays.asList(getUser(), user2);
     }
@@ -66,10 +67,10 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
 
         UserResponse userResponse = userService.getById(userId);
-
+        UserResponse expectedResponse = mapper.map(existingUser,UserResponse.class);
         assertNotNull(userResponse);
         Assertions.assertEquals(existingUser.getId(), userResponse.getId());
-        Assertions.assertEquals(existingUser.getUsername(), userResponse.getUsername());
+        Assertions.assertEquals(expectedResponse, userResponse);
     }
 
     @Test
@@ -118,11 +119,11 @@ class UserServiceTest {
     void testUpdateByIdUserExists() {
         User user = getUser();
         UserRequest userRequest = new UserRequest();
-        userRequest.setUsername("john_doe");
+        userRequest.setUsername("123456");
         userRequest.setPassword("new_password");
 
         User savedUser = new User();
-        savedUser.setUsername("john_doe");
+        savedUser.setUsername(123L);
         savedUser.setPassword("new_password");
 
         // Mock the behavior of your UserRepository
@@ -134,7 +135,7 @@ class UserServiceTest {
 
         // Assert
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("john_doe", result.getUsername());
+        Assertions.assertEquals("123456", result.getUsername());
 
         // Verify that the UserRepository's findById and save methods were called with the correct arguments
         verify(userRepository, times(1)).findById(1);

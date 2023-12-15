@@ -23,7 +23,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
         com.miniproject.library.entity.User authenticatedUser = userRepository.findByUsername(username);
 
-        final String authenticatedUsername = authenticatedUser.getUsername();
+        final String authenticatedUsername = String.valueOf(authenticatedUser.getUsername());
         final String authenticatedPassword = authenticatedUser.getPassword();
         final Role userRole = authenticatedUser.getRole();
         final SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_"+userRole.name());

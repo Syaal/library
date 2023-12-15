@@ -13,7 +13,7 @@ import java.util.Date;
 public class JwtToken {
     private static final String key = "MyKey";
     public static String getToken(User user){
-        Claims claims = Jwts.claims().setSubject(user.getUsername());
+        Claims claims = Jwts.claims().setSubject(String.valueOf(user.getUsername()));
         claims.put("username",user.getUsername());
         claims.put("roles",user.getRole().name());
         long nowMilis = System.currentTimeMillis();

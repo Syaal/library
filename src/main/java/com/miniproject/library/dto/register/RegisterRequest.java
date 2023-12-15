@@ -15,4 +15,14 @@ public class RegisterRequest {
     private String username;
     @NotBlank(message = "Masukkan Password")
     private String password;
+    @NotBlank(message = "Masukkan nama")
+    private String name;
+    @NotBlank(message = "Masukkan email")
+    private String email;
+    @NotBlank(message = "Masukkan nomer telepon")
+    private String phone;
+    @NotBlank(message = "Masukkan alamat")
+    private String address;
+    @NotBlank(message = "Masukkan jenis kelamin")
+    private String gender;
 }
