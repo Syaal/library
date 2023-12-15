@@ -34,7 +34,7 @@ public class RegisterService {
             librarianRepository.save(librarian);
             regis.setLibrarian(librarian);
             regis.setAnggota(null);
-        }else if (role.equals("VISITOR")){
+        }else {
             Anggota anggota = mapper.map(registerRequest,Anggota.class);
             anggota.setNik(Long.valueOf(registerRequest.getUsername()));
             anggotaRepository.save(anggota);

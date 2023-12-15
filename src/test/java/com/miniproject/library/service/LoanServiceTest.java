@@ -51,11 +51,11 @@ class LoanServiceTest {
         MockitoAnnotations.initMocks(this);
         Book book1 = new Book();
         book1.setId(1);
-        book1.setStock(1);
+        book1.setStock(5);
 
         Book book2 = new Book();
         book2.setId(2);
-        book2.setStock(2);
+        book2.setStock(5);
 
         Anggota anggota = new Anggota();
         anggota.setId(1);
@@ -91,6 +91,9 @@ class LoanServiceTest {
         assertNotNull(loan.getId());
         assertNotNull(loan.getDateBorrow());
         assertNotNull(loan.getDueBorrow());
+        assertEquals(4,book1.getStock());
+        assertEquals(4,book2.getStock());
+
 
         // Verify that the methods were called with the expected parameters
         verify(anggotaRepository).findById(1);
@@ -106,7 +109,7 @@ class LoanServiceTest {
 
         Book book1 = new Book();
         book1.setId(1);
-        book1.setStock(1);
+        book1.setStock(2);
 
         Book book2 = new Book();
         book2.setId(2);
@@ -153,6 +156,9 @@ class LoanServiceTest {
         // Assertions
         assertNotNull(loanResponse);
         assertEquals(1, loanResponse.getBookCartId());
+        assertEquals(3,book1.getStock());
+        assertEquals(3,book2.getStock());
+
         assertNotNull(loanResponse.getId());
         assertNotNull(loanResponse.getDateBorrow());
         assertNotNull(loanResponse.getDueBorrow());
