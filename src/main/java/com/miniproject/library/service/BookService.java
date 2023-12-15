@@ -7,6 +7,7 @@ import com.miniproject.library.entity.Category;
 import com.miniproject.library.repository.BookRepository;
 import com.miniproject.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,6 +21,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
+    private final ModelMapper mapper;
 
     public BookResponse addBook(BookRequest request){
         Book book = new Book();
@@ -35,16 +37,7 @@ public class BookService {
             book.setCategory(category);
             bookRepository.save(book);
 
-            return BookResponse.builder()
-                    .id(book.getId())
-                    .author(book.getAuthor())
-                    .publisher(book.getPublisher())
-                    .publicationDate(book.getPublicationDate())
-                    .stock(book.getStock())
-                    .title(book.getTitle())
-                    .summary(book.getSummary())
-                    .categoryName(book.getCategory().getName())
-                    .build();
+            return mapper.map(book,BookResponse.class);
         }
         throw new IllegalArgumentException("Category Id It's Not Exist");
     }
@@ -65,16 +58,7 @@ public class BookService {
             book.setCategory(category);
             bookRepository.save(book);
 
-            return BookResponse.builder()
-                    .id(book.getId())
-                    .author(book.getAuthor())
-                    .publisher(book.getPublisher())
-                    .publicationDate(book.getPublicationDate())
-                    .stock(book.getStock())
-                    .title(book.getTitle())
-                    .summary(book.getSummary())
-                    .categoryName(book.getCategory().getName())
-                    .build();
+            return mapper.map(book,BookResponse.class);
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Book Not Found");
     }
@@ -87,9 +71,4 @@ public class BookService {
         return bookRepository.findById(id).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Book It's Not Exist!!!"));
     }
-
-    public Book getBookByid(Integer id){
-        return bookRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book Not Found"));
-    }
-
 }
