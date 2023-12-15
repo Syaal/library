@@ -52,7 +52,7 @@ class UserControllerTest {
     private User getUser(){
         User user = new User();
         user.setId(1);
-        user.setUsername(2345L);
+        user.setUsername("2345");
         user.setPassword("admin");
         return user;
     }
@@ -60,7 +60,7 @@ class UserControllerTest {
         List<User> userList = new ArrayList<>();
         User user2 = new User();
         user2.setId(2);
-        user2.setUsername(2345L);
+        user2.setUsername("23451");
         user2.setPassword("admin");
         userList.add(user2);
         userList.add(getUser());
@@ -72,7 +72,7 @@ class UserControllerTest {
         UserRequest userRequest = new UserRequest();
         userRequest.setUsername("1234");
         userRequest.setPassword("123");
-        user.setUsername(Long.valueOf(userRequest.getUsername()));
+        user.setUsername(userRequest.getUsername());
         userRequest.setPassword(userRequest.getPassword());
         UserResponse expectedUpdatedUser = mapper.map(user, UserResponse.class);
         when(userService.updateById(1, userRequest)).thenReturn(expectedUpdatedUser);
@@ -164,7 +164,7 @@ class UserControllerTest {
 
         User expectedUser = new User();
         expectedUser.setId(1);
-        expectedUser.setUsername(123L);
+        expectedUser.setUsername("123");
         expectedUser.setPassword("admin");
 
         String role="VISITOR";

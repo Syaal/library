@@ -34,14 +34,14 @@ class UserServiceTest {
     private User getUser(){
         User user = new User();
         user.setId(1);
-        user.setUsername(123L);
+        user.setUsername("123");
         user.setPassword("admin");
         return user;
     }
     private List<User> userList(){
         User user2 = new User();
         user2.setId(2);
-        user2.setUsername(231L);
+        user2.setUsername("1234");
         user2.setPassword("admin");
         return Arrays.asList(getUser(), user2);
     }
@@ -123,7 +123,7 @@ class UserServiceTest {
         userRequest.setPassword("new_password");
 
         User savedUser = new User();
-        savedUser.setUsername(123L);
+        savedUser.setUsername("1234");
         savedUser.setPassword("new_password");
 
         // Mock the behavior of your UserRepository

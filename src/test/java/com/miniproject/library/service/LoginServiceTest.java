@@ -50,11 +50,11 @@ import static org.mockito.Mockito.when;
     @Test
      void testLogin() {
         LoginRequest userRequest = new LoginRequest();
-        userRequest.setUsername("12345");
+        userRequest.setUsername("123456");
         userRequest.setPassword("testPassword");
 
         User user = new User();
-        user.setUsername(12345L);
+        user.setUsername("123456");
         user.setPassword(loginService.passwordEncoder().encode("testPassword"));
         user.setId(1);
         user.setAnggota(new Anggota());
@@ -72,7 +72,7 @@ import static org.mockito.Mockito.when;
         LoginResponse response = loginService.login(userRequest);
 
         // Assertions
-        assertEquals(12345L, response.getUsername());
+        assertEquals("123456", response.getUsername());
         assertEquals("[ROLE_VISITOR]", response.getRoles());
         assertNotNull(response.getToken());
     }
@@ -84,7 +84,7 @@ import static org.mockito.Mockito.when;
         userRequest.setUsername("12345");
         userRequest.setPassword("testPassword");
         User user = new User();
-        user.setUsername(Long.valueOf(userRequest.getUsername()));
+        user.setUsername(userRequest.getUsername());
         user.setPassword("12345");
         user.setId(1);
         user.setAnggota(new Anggota());

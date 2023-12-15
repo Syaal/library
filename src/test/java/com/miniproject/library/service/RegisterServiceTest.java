@@ -71,7 +71,7 @@ class RegisterServiceTest {
         registerRequest.setPassword("123");
         String role = "VISITOR";
         User expectedUser = new User();
-        expectedUser.setUsername(12345L);
+        expectedUser.setUsername("123456");
         expectedUser.setRole(Role.valueOf(role));
         expectedUser.setLibrarian(null);
         expectedUser.setAnggota(new Anggota());

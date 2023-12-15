@@ -32,9 +32,9 @@ public class LoginService {
         UsernamePasswordAuthenticationToken.authenticated(userDetails,userDetails.isCredentialsNonExpired(),userDetails.getAuthorities());
         User user = userRepository.findByUsername(userDetails.getUsername());
         String token = JwtToken.getToken(user);
-        String username = String.valueOf(user.getUsername());
+        String username = user.getUsername();
         LoginResponse response = new LoginResponse();
-        response.setUsername(Long.valueOf(username));
+        response.setUsername(username);
         response.setRoles(userDetails.getAuthorities().toString());
         response.setToken(token);
         return response;
