@@ -10,5 +10,5 @@ public class PenaltyResponse {
     private Integer loanId;
     private String name;
     private String description;
-    private Integer cost;
+    private Integer amount;
 }
