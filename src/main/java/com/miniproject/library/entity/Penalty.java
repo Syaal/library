@@ -12,7 +12,7 @@ public class Penalty {
     private Integer id;
     private String name;
     private String description;
-    private Integer cost;
+    private Integer amount;
     @ManyToOne
     private Loan loan;
 }

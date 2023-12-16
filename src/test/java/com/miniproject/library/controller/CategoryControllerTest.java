@@ -40,6 +40,14 @@ class CategoryControllerTest {
         categoryList.add(category2);
         return categoryList;
     }
+    private CategoryResponse response(){
+        Category category = categoryList().get(1);
+        CategoryResponse response = CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .build();
+        return response;
+    }
 
     @BeforeEach
     void setUp() {
@@ -50,17 +58,29 @@ class CategoryControllerTest {
     void addCategory() {
         CategoryRequest request = new CategoryRequest();
         request.setName("18++");
-        CategoryResponse response = mapper.map(request, CategoryResponse.class);
-        response.setId(1);
+        Category category = categoryList().get(1);
+        CategoryResponse response = response();
         when(categoryService.addCategory(request)).thenReturn(response);
         ResponseEntity<CategoryResponse> responseEntity = categoryController.addCategory(request);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
         assertEquals(response, responseEntity.getBody());
     }
 
     @Test
     void updateCategory() {
+        CategoryRequest request = new CategoryRequest();
+        request.setName("21++");
+        Category category = categoryList().get(0);
+        CategoryResponse response = CategoryResponse.builder()
+                .name(category.getName())
+                .id(category.getId())
+                .build();
+        when(categoryService.updateCategory(request,category.getId())).thenReturn(response);
+
+        ResponseEntity<CategoryResponse> responseEntity = categoryController.updateCategory(1, request);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(response, responseEntity.getBody());
     }
 
     @Test
@@ -73,5 +93,9 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById() {
+        when(categoryService.getCategoryById(1)).thenReturn(categoryList().get(0));
+        ResponseEntity<Category>responseEntity = categoryController.getCategoryById(1);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(categoryList().get(0), responseEntity.getBody());
     }
 }

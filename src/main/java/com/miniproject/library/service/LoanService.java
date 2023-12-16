@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -18,18 +19,16 @@ public class LoanService {
 
     private final AnggotaRepository anggotaRepository;
 
-    private final LibrarianRepository librarianRepository;
-
     private final BookCartRepository bookCartRepository;
 
     private final BookRepository bookRepository;
 
-    private final PenaltyRepository penaltyRepository;
+    private final PenaltyService penaltyService;
 
     public LoanResponse borrowBooks(BookCartRequest bookCartRequest){
 
         Anggota anggota = anggotaRepository.findById(bookCartRequest.getAnggotaId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
         List<Book> books = bookRepository.findAllById(bookCartRequest.getBookIds());
         List<Book> availableBooks = getAvailableBook(books);
 
@@ -99,53 +98,38 @@ public class LoanService {
         return new Date(System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000));
     }
 
-    public LoanResponse returnBook(Integer id,Integer librarianId) {
-        // Memeriksa Izin Mengembalikan Buku Pada Pustakawan
-        Librarian librarian = librarianRepository.findById(librarianId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Librarian with id " + librarianId + " not found"));
+    public LoanResponse returnBooks(Integer loanId, boolean isDamagedOrLost) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan ID not found"));
 
-        // Mengembalikan buku by id Loan
-        Loan loan = loanRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan Not Found with ID " + id));
+        Date currentDate = new Date();
 
-        // Memeriksa apakah pinjaman sudah dikembalikan
-        if (loan.getDateReturn() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Loan with ID " + id + " has already been returned");
+        if (currentDate.after(loan.getDueBorrow())) {
+            long diffInMillies = Math.abs(currentDate.getTime() - loan.getDueBorrow().getTime());
+            long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            Integer overdueFine = Math.toIntExact(diff * 50000);
+
+            penaltyService.createPenalty(loan, overdueFine);
         }
 
-        // Tetapkan tanggal pengembalian
-        loan.setDateReturn(new Date());
-        loanRepository.save(loan);
+        if (isDamagedOrLost) {
+            Integer damagedOrLostFine = 5000000;
+            penaltyService.createPenalty(loan, damagedOrLostFine);
+        }
 
-        // Ambil BookCart yang terkait dengan Pinjaman
         BookCart bookCart = loan.getBookCarts();
-
-        // Retrieve books in the BookCart
         List<Book> returnedBooks = bookCart.getBook();
+        updateBookStockAndRead(returnedBooks, false);
+
+        loan.setDateReturn(currentDate);
+        loanRepository.save(loan);
 
         return LoanResponse.builder()
                 .id(loan.getId())
-                .bookCartId(bookCart.getId())
                 .dateBorrow(loan.getDateBorrow())
+                .dateReturn(currentDate)
                 .dueBorrow(loan.getDueBorrow())
-                .dateReturn(loan.getDateReturn())
+                .bookCartId(bookCart.getId())
                 .build();
-    }
-
-    public void updateStockAndRead(List<Book> books, boolean increaseRead) {
-        for (Book book : books) {
-            if (increaseRead) {
-                // tambahkan stock
-                book.setStock(book.getStock() + 1);
-                // Kurangi jumlah baca
-                Integer currentRead = book.getRead();
-                book.setRead(currentRead != null ? Math.max(currentRead - 1, 0) : 0);
-            } else {
-                // Kurangi Stock
-                Integer currentStock = book.getStock();
-                book.setStock(currentStock != null ? Math.max(currentStock - 1, 0) : 0);
-            }
-            bookRepository.save(book);
-        }
     }
 }

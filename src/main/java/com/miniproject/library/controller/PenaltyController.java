@@ -2,14 +2,19 @@ package com.miniproject.library.controller;
 
 import com.miniproject.library.dto.penalty.PenaltyRequest;
 import com.miniproject.library.dto.penalty.PenaltyResponse;
+import com.miniproject.library.entity.Loan;
 import com.miniproject.library.entity.Penalty;
+import com.miniproject.library.repository.LoanRepository;
 import com.miniproject.library.service.PenaltyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -17,50 +22,36 @@ import java.util.List;
 @RequestMapping("/penalty")
 public class PenaltyController {
     private final PenaltyService penaltyService;
+    private final LoanRepository loanRepository;
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<Penalty>> getAllPenalties() {
         List<Penalty> penalties = penaltyService.getAllPenalties();
         return ResponseEntity.ok(penalties);
     }
-    @PostMapping("/apply/{loanId}")
-    public ResponseEntity<PenaltyResponse> applyPenalty(@RequestBody PenaltyRequest penaltyRequest,
-                                                        @PathVariable Integer loanId) {
-        try {
-            PenaltyResponse penaltyResponse = penaltyService.processPenaltyForLateReturnAndDamage(penaltyRequest, loanId, penaltyRequest.isLost(), penaltyRequest.isDamaged());
-            return ResponseEntity.ok(penaltyResponse);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
+    @PostMapping("/create")
+    public ResponseEntity<PenaltyResponse> createPenalty(@RequestParam Integer loanId, @RequestParam Integer amount) {
+        Optional<Loan> optionalLoan = loanRepository.findById(loanId);
+        if (optionalLoan.isPresent()) {
+            Loan loan = optionalLoan.get();
+            PenaltyResponse response = penaltyService.createPenalty(loan, amount);
+            return ResponseEntity.ok(response);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan with ID " + loanId + " not found.");
         }
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<PenaltyResponse> getPenaltyById(@PathVariable Integer id) {
-        try {
-            PenaltyResponse penaltyResponse = penaltyService.getPenaltyById(id);
-            return ResponseEntity.ok(penaltyResponse);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        PenaltyResponse response = penaltyService.getPenaltyById(id);
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{penaltyId}")
-    public ResponseEntity<Void> deletePenalty(@PathVariable Integer id) {
-        try {
-            penaltyService.deletePenalty(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-    @GetMapping("/check/{loanId}")
-    public ResponseEntity<Boolean> checkPenalty(@PathVariable Integer id) {
-        try {
-            Penalty penalty = penaltyService.calculatePenalty(id);
-            return ResponseEntity.ok(penalty.getCost() > 0);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePenalty(@PathVariable Integer id) {
+        penaltyService.deletePenalty(id);
+        return ResponseEntity.ok("Penalty with ID " + id + " deleted successfully.");
     }
 
 
