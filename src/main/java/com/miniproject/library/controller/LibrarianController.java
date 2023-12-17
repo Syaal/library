@@ -19,7 +19,7 @@ import java.util.List;
 public class LibrarianController {
     private final LibrarianService librarianService;
 
-    @PutMapping("/{id}")
+    @PutMapping("/edit/{id}")
     public ResponseEntity<LibrarianResponse> updateLibrarian(@PathVariable Integer id, @Valid
     @RequestBody LibrarianRequest request){
         LibrarianResponse librarianResponse = librarianService.updateLibrarian(request, id);

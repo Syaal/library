@@ -19,20 +19,20 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<CategoryResponse> addCategory(@RequestBody CategoryRequest request){
         CategoryResponse categoryResponse = categoryService.addCategory(request);
         return new ResponseEntity<>(categoryResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/edit/{id}")
     public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Integer id, @Valid
                                                             @RequestBody CategoryRequest request){
         CategoryResponse categoryResponse = categoryService.updateCategory(request, id);
         return ResponseEntity.ok(categoryResponse);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Category>> getAllCategory(){
         List<Category> categories = categoryService.getAllCategory();
         return ResponseEntity.ok(categories);

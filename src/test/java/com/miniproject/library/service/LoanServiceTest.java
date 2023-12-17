@@ -250,4 +250,63 @@ class LoanServiceTest {
         verify(penaltyService, times(1)).createPenalty(eq(loan), eq(5000000));
         assertEquals(1, response.getId());
     }
+    @Test
+    void testBorrowBooks_BookCartNotFound() {
+        // Persiapan data untuk pengujian
+        BookCartRequest bookCartRequest = new BookCartRequest();
+        bookCartRequest.setAnggotaId(1); // ID anggota yang valid
+        List<Integer> bookIds = Arrays.asList(1, 2); // ID buku yang valid
+        bookCartRequest.setBookIds(bookIds);
+
+        Anggota anggota = new Anggota();
+        when(anggotaRepository.findById(1)).thenReturn(Optional.of(anggota));
+
+        List<Book> availableBooks = Arrays.asList(new Book(), new Book());
+        when(bookRepository.findAllById(bookIds)).thenReturn(availableBooks);
+
+        // Mock ketika bookCartRepository.findById mengembalikan Optional kosong
+        when(bookCartRepository.findById(any())).thenReturn(Optional.empty());
+
+        // Memanggil metode yang ingin diuji dan menangkap pengecualian
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> loanService.borrowBooks(bookCartRequest));
+
+        // Verifikasi bahwa pengecualian terjadi dengan pesan yang diharapkan
+        assertNotNull(exception);
+        assertEquals("Books Out of Stock", exception.getMessage());
+    }
+
+    @Test
+    void testBorrowBooks_BooksNotAvailable_AddedToWishlist() {
+        BookCartRequest bookCartRequest = new BookCartRequest();
+        bookCartRequest.setAnggotaId(1); // ID anggota yang valid
+        List<Integer> bookIds = Arrays.asList(1, 2); // ID buku yang tidak tersedia
+        bookCartRequest.setBookIds(bookIds);
+
+        Anggota anggota = new Anggota();
+        when(anggotaRepository.findById(1)).thenReturn(Optional.of(anggota));
+
+        List<Book> books = Arrays.asList(new Book(), new Book()); // Buku yang tidak tersedia
+        when(bookRepository.findAllById(bookIds)).thenReturn(books);
+
+        // Mock ketika bookRepository.save(any(Book.class)) dipanggil
+        when(bookRepository.save(any(Book.class))).thenReturn(new Book());
+
+        // Memanggil metode yang ingin diuji dan menangkap pengecualian
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> loanService.borrowBooks(bookCartRequest));
+
+        // Verifikasi bahwa pengecualian terjadi dengan pesan yang diharapkan
+        assertNotNull(exception);
+        assertEquals("Books Out of Stock", exception.getMessage());
+
+        // Verifikasi bahwa bookRepository.save dipanggil sebanyak buku yang tidak tersedia
+        verify(bookRepository, times(books.size())).save(any(Book.class));
+
+        // Verifikasi bahwa nilai wishlist pada setiap buku telah ditingkatkan
+        for (Book book : books) {
+            assertNotNull(book.getWishlist());
+            assertEquals(1, book.getWishlist()); // Memastikan wishlist bertambah sebesar 1
+        }
+    }
 }
