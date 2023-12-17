@@ -17,6 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @RequiredArgsConstructor
@@ -50,11 +53,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/login", "/users/register/{role}", "/users/all", "/category/all", "/book/all", "/book/{id}", "/penalty/all", "penalty/{id}").permitAll()
                         .requestMatchers(Auth_Swagger).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/category", "/book", "/penalty/create").hasRole(LIBRARIAN)
+                        .requestMatchers(HttpMethod.POST, "/category", "/book", "/penalty/create", "/loan/return").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.PUT, "/users/edit-{id}", "/librarian/edit-{id}", "/anggota/edit-{id}", "/category/edit-{id}", "/book/edit-{id}").hasRole(LIBRARIAN)
-                        .requestMatchers(HttpMethod.GET, "/users/{id}", "/librarian/{id}", "/librarian/all", "/category/{id}", "/book-report").hasRole(LIBRARIAN)
+                        .requestMatchers(HttpMethod.GET, "/users/{id}", "/librarian/{id}", "/librarian/all", "/category/{id}", "/book/book-report").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.DELETE, "/users/delete-{id}", "/librarian/delete-{id}", "/anggota/delete-{id}", "/penalty/{id}").hasRole(LIBRARIAN)
-                        .requestMatchers(HttpMethod.POST, "/loan/borrow", "/loan/return").hasRole(VISITOR)
+                        .requestMatchers(HttpMethod.POST, "/loan/borrow").hasRole(VISITOR)
                         .requestMatchers(HttpMethod.GET, "/anggota/{id}", "/anggota/all").hasRole(VISITOR)
                         .anyRequest().authenticated()
                 )
@@ -65,7 +68,6 @@ public class SecurityConfig {
 
     private static final String[] Auth_Swagger = {
             "/v3/api-docs/**",
-            "/v3/api-docs.yaml",
             "/swagger-ui.html",
             "/swagger-ui/**"
     };
