@@ -29,7 +29,7 @@ public class BookController {
         return new ResponseEntity<>(bookResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/edit/{id}")
     public ResponseEntity<BookResponse> updateBook(@PathVariable Integer id, @Valid
     @RequestBody BookRequest request){
         BookResponse bookResponse = bookService.updateBook(request, id);
