@@ -6,6 +6,7 @@ import com.miniproject.library.dto.book.BookResponse;
 import com.miniproject.library.entity.Book;
 import com.miniproject.library.service.BookReport;
 import com.miniproject.library.service.BookService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Book")
 @RequestMapping("/book")
 public class BookController {
     private final BookService bookService;
@@ -29,7 +31,7 @@ public class BookController {
         return new ResponseEntity<>(bookResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/edit/{id}")
+    @PutMapping("/edit-{id}")
     public ResponseEntity<BookResponse> updateBook(@PathVariable Integer id, @Valid
     @RequestBody BookRequest request){
         BookResponse bookResponse = bookService.updateBook(request, id);
