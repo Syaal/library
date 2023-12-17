@@ -49,7 +49,7 @@ public class BookController {
         return ResponseEntity.ok(book);
     }
 
-    @GetMapping("/book-report")
+    @GetMapping
     public ResponseEntity<byte[]> generateBookReport() {
         try {
             List<Book> bookList = bookService.getAllBook();
