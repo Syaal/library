@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,4 +28,15 @@ public class LoanController {
         LoanResponse response = loanService.returnBooks(loanId, isDamagedOrLost);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/anggota/{anggotaId}/loanId")
+    public ResponseEntity<Integer> getLoanIdByAnggotaId(@PathVariable Integer anggotaId) {
+        Integer loanId = loanService.getLoanIdByAnggotaId(anggotaId);
+
+        if (loanId == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan ID not found for the provided Anggota ID");
+        }
+
+        return ResponseEntity.ok(loanId);
+    }
+
 }
