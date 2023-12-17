@@ -132,4 +132,8 @@ public class LoanService {
                 .bookCartId(bookCart.getId())
                 .build();
     }
+    public Integer getLoanIdByAnggotaId(Integer anggotaId) {
+        Optional<Loan> loan = loanRepository.findLoanAnggota(anggotaId);
+        return loan.map(Loan::getId).orElse(null);
+    }
 }
