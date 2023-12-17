@@ -93,6 +93,8 @@ class LoanServiceTest {
         assertNotNull(loan.getId());
         assertNotNull(loan.getDateBorrow());
         assertNotNull(loan.getDueBorrow());
+        assertEquals(0,book1.getStock());
+        assertEquals(1,book2.getStock());
 
         verify(anggotaRepository).findById(1);
         verify(bookRepository).findAllById(List.of(1, 2));
@@ -137,6 +139,13 @@ class LoanServiceTest {
     @Test
     void testReturnBooks() {
         int loanId = 1;
+        Book book1 = new Book();
+        book1.setId(1);
+        book1.setStock(1);
+
+        Book book2 = new Book();
+        book2.setId(2);
+        book2.setStock(2);
         Loan loan = new Loan();
         loan.setId(loanId);
         loan.setDateBorrow(new Date());
@@ -144,6 +153,8 @@ class LoanServiceTest {
 
         BookCart bookCart = new BookCart();
         List<Book> books = new ArrayList<>();
+        books.add(book1);
+        books.add(book2);
         bookCart.setBook(books);
         loan.setBookCarts(bookCart);
 
@@ -155,6 +166,8 @@ class LoanServiceTest {
         verify(loanRepository, times(1)).save(any(Loan.class));
         assertNotNull(loanResponse);
         assertEquals(loanId, loanResponse.getId());
+        assertEquals(2,book1.getStock());
+        assertEquals(3,book2.getStock());
         assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
         assertEquals(loan.getDueBorrow(), loanResponse.getDueBorrow());
         assertEquals(bookCart.getId(), loanResponse.getBookCartId());
@@ -308,5 +321,36 @@ class LoanServiceTest {
             assertNotNull(book.getWishlist());
             assertEquals(1, book.getWishlist()); // Memastikan wishlist bertambah sebesar 1
         }
+    }
+    @Test
+    public void testGetLoanIdByAnggotaId_WhenLoanExists() {
+        // Given
+        Integer anggotaId = 1;
+        Loan loan = new Loan();
+        loan.setId(10);
+
+        when(loanRepository.findLoanAnggota(anggotaId)).thenReturn(Optional.of(loan));
+
+        // When
+        Integer result = loanService.getLoanIdByAnggotaId(anggotaId);
+
+        // Then
+        assertEquals(loan.getId(), result);
+        verify(loanRepository).findLoanAnggota(anggotaId);
+    }
+
+    @Test
+    public void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
+        // Given
+        Integer anggotaId = 1;
+
+        when(loanRepository.findLoanAnggota(anggotaId)).thenReturn(Optional.empty());
+
+        // When
+        Integer result = loanService.getLoanIdByAnggotaId(anggotaId);
+
+        // Then
+        assertNull(result);
+        verify(loanRepository).findLoanAnggota(anggotaId);
     }
 }
