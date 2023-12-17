@@ -3,6 +3,7 @@ package com.miniproject.library.controller;
 import com.miniproject.library.dto.bookcart.BookCartRequest;
 import com.miniproject.library.dto.loan.LoanResponse;
 import com.miniproject.library.service.LoanService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
+@Tag(name = "Loan")
 @RequestMapping("/loan")
 public class LoanController {
     private final LoanService loanService;

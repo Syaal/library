@@ -9,6 +9,7 @@ import com.miniproject.library.entity.User;
 import com.miniproject.library.service.LoginService;
 import com.miniproject.library.service.RegisterService;
 import com.miniproject.library.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Users")
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
@@ -28,7 +30,7 @@ public class UserController {
 
     private final LoginService loginService;
 
-    @PutMapping("/{id}")
+    @PutMapping("/edit-{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable Integer id, @Valid @RequestBody UserRequest userRequest) {
             UserResponse updatedUser = userService.updateById(id, userRequest);
             return ResponseEntity.ok(updatedUser);
@@ -45,7 +47,7 @@ public class UserController {
             return ResponseEntity.ok(user);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Integer id){
         userService.deleteById(id);
         return ResponseEntity.ok("User deleted successfully");

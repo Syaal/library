@@ -4,6 +4,7 @@ import com.miniproject.library.dto.category.CategoryRequest;
 import com.miniproject.library.dto.category.CategoryResponse;
 import com.miniproject.library.entity.Category;
 import com.miniproject.library.service.CategoryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Category")
 @RequestMapping("/category")
 public class CategoryController {
     private final CategoryService categoryService;
@@ -25,14 +27,14 @@ public class CategoryController {
         return new ResponseEntity<>(categoryResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/edit-{id}")
     public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Integer id, @Valid
                                                             @RequestBody CategoryRequest request){
         CategoryResponse categoryResponse = categoryService.updateCategory(request, id);
         return ResponseEntity.ok(categoryResponse);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Category>> getAllCategory(){
         List<Category> categories = categoryService.getAllCategory();
         return ResponseEntity.ok(categories);
