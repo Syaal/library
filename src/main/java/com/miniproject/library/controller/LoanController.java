@@ -28,6 +28,7 @@ public class LoanController {
         LoanResponse response = loanService.returnBooks(loanId, isDamagedOrLost);
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/anggota/{anggotaId}/loanId")
     public ResponseEntity<Integer> getLoanIdByAnggotaId(@PathVariable Integer anggotaId) {
         Integer loanId = loanService.getLoanIdByAnggotaId(anggotaId);

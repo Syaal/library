@@ -47,25 +47,25 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/login", "/users/register/{role}", "/users/all", "/category/all", "/book/all", "/book/{id}", "/penalty/all", "penalty/{id}").permitAll()
+                        .requestMatchers("/users/login", "/users/register/{role}", "/users/all").permitAll()
                         .requestMatchers(Auth_Swagger).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/category", "/book", "/penalty/create").hasRole(LIBRARIAN)
+                        .requestMatchers(HttpMethod.GET, "/book/{id}", "/penalty/all", "/penalty/{id}", "/category/all", "/book/all").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/category", "/book", "/penalty", "/loan/return").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.PUT, "/users/edit-{id}", "/librarian/edit-{id}", "/anggota/edit-{id}", "/category/edit-{id}", "/book/edit-{id}").hasRole(LIBRARIAN)
-                        .requestMatchers(HttpMethod.GET, "/users/{id}", "/librarian/{id}", "/librarian/all", "/category/{id}", "/book-report").hasRole(LIBRARIAN)
+                        .requestMatchers(HttpMethod.GET, "/users/{id}", "/librarian/{id}", "/librarian/all", "/category/{id}", "/book").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.DELETE, "/users/delete-{id}", "/librarian/delete-{id}", "/anggota/delete-{id}", "/penalty/{id}").hasRole(LIBRARIAN)
-                        .requestMatchers(HttpMethod.POST, "/loan/borrow", "/loan/return").hasRole(VISITOR)
-                        .requestMatchers(HttpMethod.GET, "/anggota/{id}", "/anggota/all").hasRole(VISITOR)
+                        .requestMatchers(HttpMethod.POST, "/loan/borrow").hasRole(VISITOR)
+                        .requestMatchers(HttpMethod.GET, "/anggota/{id}", "/anggota/all", "/loan/anggota/{anggotaId}/loanId").hasRole(VISITOR)
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
     private static final String[] Auth_Swagger = {
             "/v3/api-docs/**",
-            "/v3/api-docs.yaml",
             "/swagger-ui.html",
             "/swagger-ui/**"
     };

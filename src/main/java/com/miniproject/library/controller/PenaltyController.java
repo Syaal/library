@@ -29,7 +29,7 @@ public class PenaltyController {
         return ResponseEntity.ok(penalties);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<PenaltyResponse> createPenalty(@RequestParam Integer loanId, @RequestParam Integer amount) {
         Optional<Loan> optionalLoan = loanRepository.findById(loanId);
         if (optionalLoan.isPresent()) {

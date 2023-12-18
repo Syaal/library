@@ -35,6 +35,7 @@ public class UserController {
             UserResponse updatedUser = userService.updateById(id, userRequest);
             return ResponseEntity.ok(updatedUser);
     }
+
     @GetMapping("/all")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.getAll();
