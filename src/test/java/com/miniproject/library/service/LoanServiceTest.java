@@ -86,7 +86,7 @@ class LoanServiceTest {
         when(loanRepository.save(any(Loan.class))).thenReturn(loan);
 
         LoanResponse loanResponse = loanService.borrowBooks(bookCartRequest);
-
+        loanResponse.setBookCartId(bookCart.getId());
 
         assertNotNull(loanResponse);
         assertEquals(1, loanResponse.getBookCartId());

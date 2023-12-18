@@ -47,8 +47,7 @@ public class LoanService {
         Loan loan = new Loan();
         loan.setDateBorrow(new Date());
         loan.setDueBorrow(calculateDueDate());
-        loan.setBookCarts(bookCartRepository.findById(bookCart.getId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id BookCart It's Not Exist!!!")));
+        loan.setBookCarts(bookCart);
         loanRepository.save(loan);
 
         //update data BookStock dan Jumlah Baca

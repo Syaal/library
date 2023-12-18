@@ -25,6 +25,9 @@ public class RegisterService {
 
     public User register(RegisterRequest registerRequest, String role){
         role = role.toUpperCase();
+        if (userRepository.findByUsername(registerRequest.getUsername()) != null){
+            throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "NIK/NIP sudah terdaftar");
+        }
         User regis = mapper.map(registerRequest, User.class);
         regis.setPassword(passwordEncoder().encode(registerRequest.getPassword()));
         regis.setRole(Role.valueOf(role));
