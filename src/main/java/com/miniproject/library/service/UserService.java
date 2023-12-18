@@ -3,6 +3,7 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
 import com.miniproject.library.entity.User;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
 
+    private static final String USER_NOT_FOUND = "User Not Found";
+
+    private final UserRepository userRepository;
     private final ModelMapper mapper = new ModelMapper();
 
     public List<UserResponse>getAll(){
         List<User> userList=userRepository.findAll();
-        return userList.stream().map(user -> mapper.map(user,UserResponse.class)).collect(Collectors.toList());
+        return userList.stream().map(user -> mapper.map(user,UserResponse.class)).toList();
     }
 
     public UserResponse getById(Integer id) {
@@ -33,7 +36,7 @@ public class UserService {
             User user = userOptional.get();
             return mapper.map(user, UserResponse.class);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pengguna tidak ditemukan");
+            throw new ResourceNotFoundException(USER_NOT_FOUND);
         }
     }
 
@@ -43,7 +46,7 @@ public class UserService {
         if (userOptional.isPresent()) {
             userRepository.deleteById(id);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pengguna tidak ditemukan");
+            throw new ResourceNotFoundException(USER_NOT_FOUND);
         }
     }
     public UserResponse updateById(Integer id,@Valid UserRequest userRequest) {
@@ -57,7 +60,7 @@ public class UserService {
 
             return modelMapper.map(existingUser, UserResponse.class);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pengguna tidak ditemukan");
+            throw new ResourceNotFoundException(USER_NOT_FOUND);
         }
     }
 }

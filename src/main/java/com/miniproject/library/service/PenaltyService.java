@@ -3,6 +3,7 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.penalty.PenaltyResponse;
 import com.miniproject.library.entity.Loan;
 import com.miniproject.library.entity.Penalty;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.LoanRepository;
 import com.miniproject.library.repository.PenaltyRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import com.miniproject.library.repository.BookRepository;
 @RequiredArgsConstructor
 public class PenaltyService {
     private final PenaltyRepository penaltyRepository;
+    private static final String ID_PENALTY_NOT_FOUND = "Id Penalty Not Found";
 
     public List<Penalty> getAllPenalties() {
         return penaltyRepository.findAll();
@@ -42,7 +44,7 @@ public class PenaltyService {
 
     public PenaltyResponse getPenaltyById(Integer id) {
         Penalty penalty = penaltyRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Penalty with ID " + id + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundException(ID_PENALTY_NOT_FOUND));
 
         return PenaltyResponse.builder()
                 .id(penalty.getId())
@@ -56,7 +58,7 @@ public class PenaltyService {
         if (penaltyRepository.existsById(id)) {
             penaltyRepository.deleteById(id);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Penalty with ID " + id + " Not Found");
+            throw new ResourceNotFoundException(ID_PENALTY_NOT_FOUND);
         }
     }
 

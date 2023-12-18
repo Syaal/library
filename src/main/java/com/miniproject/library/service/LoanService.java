@@ -3,11 +3,10 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.bookcart.BookCartRequest;
 import com.miniproject.library.dto.loan.LoanResponse;
 import com.miniproject.library.entity.*;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -16,25 +15,25 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class LoanService {
     private final LoanRepository loanRepository;
-
     private final AnggotaRepository anggotaRepository;
-
     private final BookCartRepository bookCartRepository;
-
     private final BookRepository bookRepository;
-
     private final PenaltyService penaltyService;
+
+    private static final String ID_ANGGOTA_NOT_FOUND = "Id Anggota Not Found";
+    private static final String BOOK_OUT_OF_STOCK = "Book Out of Stock";
+    private static final String ID_LOAN_NOT_FOUND = "Id Loan Not Found";
 
     public LoanResponse borrowBooks(BookCartRequest bookCartRequest){
 
         Anggota anggota = anggotaRepository.findById(bookCartRequest.getAnggotaId()).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
+                    new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
         List<Book> books = bookRepository.findAllById(bookCartRequest.getBookIds());
         List<Book> availableBooks = getAvailableBook(books);
 
         if (availableBooks.isEmpty()){
             increaseWishList(books);
-            throw new IllegalArgumentException("Books Out of Stock");
+            throw new ResourceNotFoundException(BOOK_OUT_OF_STOCK);
         }
 
         //create BookCart
@@ -99,7 +98,7 @@ public class LoanService {
 
     public LoanResponse returnBooks(Integer loanId, boolean isDamagedOrLost) {
         Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan ID not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ID_LOAN_NOT_FOUND));
 
         Date currentDate = new Date();
 

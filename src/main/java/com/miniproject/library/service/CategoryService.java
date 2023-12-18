@@ -3,11 +3,10 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.category.CategoryRequest;
 import com.miniproject.library.dto.category.CategoryResponse;
 import com.miniproject.library.entity.Category;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private static final String ID_CATEGORY_NOT_FOUND = "Id Category Not Found";
 
     public CategoryResponse addCategory(CategoryRequest request){
         Category category = new Category();
@@ -40,7 +40,7 @@ public class CategoryService {
                     .name(category.getName())
                     .build();
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Category Not Found");
+        throw new ResourceNotFoundException(ID_CATEGORY_NOT_FOUND);
     }
 
     public List<Category> getAllCategory(){
@@ -49,6 +49,6 @@ public class CategoryService {
 
     public Category getCategoryById(Integer id){
         return categoryRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Category It's Not Exist!!!"));
+                new ResourceNotFoundException(ID_CATEGORY_NOT_FOUND));
     }
 }

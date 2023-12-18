@@ -3,11 +3,10 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.anggota.AnggotaRequest;
 import com.miniproject.library.dto.anggota.AnggotaResponse;
 import com.miniproject.library.entity.Anggota;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.AnggotaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AnggotaService {
     private final AnggotaRepository anggotaRepository;
+    private static final String ID_ANGGOTA_NOT_FOUND = "Id Anggota Not Found";
 
     public AnggotaResponse updateAnggota(AnggotaRequest request, Integer id){
         Optional<Anggota> optionalAnggota = anggotaRepository.findById(id);
@@ -40,7 +40,7 @@ public class AnggotaService {
                     .gender(anggota.getGender())
                     .build();
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota Not Found");
+        throw new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND);
     }
 
     public List<Anggota> getAllAnggota(){
@@ -49,7 +49,7 @@ public class AnggotaService {
 
     public Anggota getAnggotaById(Integer id){
         return anggotaRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
+                new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
     }
 
     public void deleteAnggotaById(Integer id){

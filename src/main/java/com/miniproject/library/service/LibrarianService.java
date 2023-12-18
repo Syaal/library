@@ -3,11 +3,10 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.librarian.LibrarianRequest;
 import com.miniproject.library.dto.librarian.LibrarianResponse;
 import com.miniproject.library.entity.Librarian;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.LibrarianRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LibrarianService {
     private final LibrarianRepository librarianRepository;
+    private static final String ID_LIBRARIAN_NOT_FOUND = "Id Librarian Not Found";
 
     public LibrarianResponse updateLibrarian(LibrarianRequest request, Integer id){
         Optional<Librarian> optionalLibrarian = librarianRepository.findById(id);
@@ -40,7 +40,7 @@ public class LibrarianService {
                     .gender(librarian.getGender())
                     .build();
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Librarian Not Found");
+        throw new ResourceNotFoundException(ID_LIBRARIAN_NOT_FOUND);
     }
 
     public List<Librarian> getAllLibrarian(){
@@ -49,7 +49,7 @@ public class LibrarianService {
 
     public Librarian getLibrarianById(Integer id){
         return librarianRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Librarian It's Not Exist!!!"));
+                new ResourceNotFoundException(ID_LIBRARIAN_NOT_FOUND));
     }
 
     public void deleteLibrarianById(Integer id){
