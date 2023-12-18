@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,15 @@ public class LoanService {
 
     private final PenaltyService penaltyService;
 
+    public boolean hasUnreturnedBooks(Integer anggotaId) {
+        Optional<Loan> unreturnedLoan = loanRepository.findLoanAnggota(anggotaId);
+        return unreturnedLoan.isPresent();
+    }
+
     public LoanResponse borrowBooks(BookCartRequest bookCartRequest){
+        if (hasUnreturnedBooks(bookCartRequest.getAnggotaId())) {
+            throw new IllegalStateException("Anda masih memiliki buku yang belum dikembalikan.");
+        }
 
         Anggota anggota = anggotaRepository.findById(bookCartRequest.getAnggotaId()).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
@@ -47,7 +56,8 @@ public class LoanService {
         Loan loan = new Loan();
         loan.setDateBorrow(new Date());
         loan.setDueBorrow(calculateDueDate());
-        loan.setBookCarts(bookCart);
+        loan.setBookCarts(bookCartRepository.findById(bookCart.getId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id BookCart It's Not Exist!!!")));
         loanRepository.save(loan);
 
         //update data BookStock dan Jumlah Baca
@@ -97,7 +107,7 @@ public class LoanService {
         return new Date(System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000));
     }
 
-    public LoanResponse returnBooks(Integer loanId, boolean isDamagedOrLost) {
+    public LoanResponse returnBooks(Integer loanId, List<Integer> bookIdsReturned, boolean isDamagedOrLost) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan ID not found"));
 
@@ -118,7 +128,27 @@ public class LoanService {
 
         BookCart bookCart = loan.getBookCarts();
         List<Book> returnedBooks = bookCart.getBook();
-        updateBookStockAndRead(returnedBooks, false);
+
+        // Memastikan setiap buku yang dikembalikan diverifikasi secara individu
+        for (Integer bookId : bookIdsReturned) {
+            boolean foundBook = false;
+            for (Book book : returnedBooks) {
+                if (book.getId().equals(bookId)) {
+                    foundBook = true;
+                    break;
+                }
+            }
+            if (!foundBook) {
+                throw new IllegalArgumentException("Buku dengan ID " + bookId + " tidak ditemukan dalam daftar peminjaman.");
+            }
+        }
+
+        // Update stok buku yang dikembalikan
+        List<Book> booksToReturn = returnedBooks.stream()
+                .filter(book -> bookIdsReturned.contains(book.getId()))
+                .collect(Collectors.toList());
+
+        updateBookStockAndRead(booksToReturn, false);
 
         loan.setDateReturn(currentDate);
         loanRepository.save(loan);
@@ -131,8 +161,10 @@ public class LoanService {
                 .bookCartId(bookCart.getId())
                 .build();
     }
+
     public Integer getLoanIdByAnggotaId(Integer anggotaId) {
         Optional<Loan> loan = loanRepository.findLoanAnggota(anggotaId);
         return loan.map(Loan::getId).orElse(null);
     }
+
 }

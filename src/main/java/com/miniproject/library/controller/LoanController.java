@@ -3,16 +3,16 @@ package com.miniproject.library.controller;
 import com.miniproject.library.dto.bookcart.BookCartRequest;
 import com.miniproject.library.dto.loan.LoanResponse;
 import com.miniproject.library.service.LoanService;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
-@Tag(name = "Loan")
 @RequestMapping("/loan")
 public class LoanController {
     private final LoanService loanService;
@@ -23,12 +23,19 @@ public class LoanController {
         return new ResponseEntity<>(borrowResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping("/return")
-    public ResponseEntity<LoanResponse> returnBooks(@RequestParam Integer loanId, @RequestParam boolean isDamagedOrLost) {
-        LoanResponse response = loanService.returnBooks(loanId, isDamagedOrLost);
-        return ResponseEntity.ok(response);
+    @PostMapping("/return/{loanId}")
+    public ResponseEntity<LoanResponse> returnBooks(
+            @PathVariable Integer loanId,
+            @RequestParam List<Integer> bookIdsReturned,
+            @RequestParam boolean isDamagedOrLost
+    ) {
+        try {
+            LoanResponse response = loanService.returnBooks(loanId, bookIdsReturned, isDamagedOrLost);
+            return ResponseEntity.ok().body(response);
+        } catch (IllegalArgumentException | ResponseStatusException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
-
     @GetMapping("/anggota/{anggotaId}/loanId")
     public ResponseEntity<Integer> getLoanIdByAnggotaId(@PathVariable Integer anggotaId) {
         Integer loanId = loanService.getLoanIdByAnggotaId(anggotaId);
@@ -39,5 +46,4 @@ public class LoanController {
 
         return ResponseEntity.ok(loanId);
     }
-
 }
