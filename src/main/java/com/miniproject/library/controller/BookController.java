@@ -51,7 +51,6 @@ public class BookController {
 
     @GetMapping
     public ResponseEntity<byte[]> generateBookReport() {
-        try {
             List<Book> bookList = bookService.getAllBook();
             BookReport pdfService = new BookReport();
             byte[] pdfContent = pdfService.generateBookReport(bookList);
@@ -61,10 +60,5 @@ public class BookController {
             headers.setContentDispositionFormData("attachment", "BookReport.pdf");
 
             return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
-        } catch (Exception e) {
-            // Handle exceptions
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 }

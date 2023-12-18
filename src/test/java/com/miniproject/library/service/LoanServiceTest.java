@@ -104,7 +104,7 @@ class LoanServiceTest {
     }
 
     @Test
-    public void testBorrowBooksWithUnavailableBooks() {
+    void testBorrowBooksWithUnavailableBooks() {
         BookCartRequest bookCartRequest = new BookCartRequest();
         bookCartRequest.setAnggotaId(1);
         bookCartRequest.setBookIds(Arrays.asList(1, 2, 3));
@@ -260,7 +260,7 @@ class LoanServiceTest {
         LoanResponse response = loanService.returnBooks(1, true);
 
         // Verifikasi
-        verify(penaltyService, times(1)).createPenalty(eq(loan), eq(5000000));
+        verify(penaltyService, times(1)).createPenalty((loan), (5000000));
         assertEquals(1, response.getId());
     }
     @Test
@@ -323,7 +323,7 @@ class LoanServiceTest {
         }
     }
     @Test
-    public void testGetLoanIdByAnggotaId_WhenLoanExists() {
+    void testGetLoanIdByAnggotaId_WhenLoanExists() {
         // Given
         Integer anggotaId = 1;
         Loan loan = new Loan();
@@ -340,7 +340,7 @@ class LoanServiceTest {
     }
 
     @Test
-    public void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
+    void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
         // Given
         Integer anggotaId = 1;
 
