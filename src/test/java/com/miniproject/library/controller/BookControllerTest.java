@@ -6,7 +6,6 @@ import com.miniproject.library.entity.Book;
 import com.miniproject.library.entity.Category;
 import com.miniproject.library.service.BookReport;
 import com.miniproject.library.service.BookService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -19,11 +18,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +32,8 @@ class BookControllerTest {
     BookController bookController;
     @Mock
     BookService bookService;
+    @Mock
+    BookReport bookReport;
 
     private final ModelMapper mapper = new ModelMapper();
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
