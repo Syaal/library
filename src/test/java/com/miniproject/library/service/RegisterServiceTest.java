@@ -48,6 +48,7 @@ class RegisterServiceTest {
         registerRequest.setUsername("12345");
         registerRequest.setPassword("123");
         String role = "LIBRARIAN";
+        when(userRepository.findByUsername(registerRequest.getUsername())).thenReturn(null);
 
         // Mocking behavior
         when(userRepository.save(any())).thenReturn(new User());
@@ -76,6 +77,7 @@ class RegisterServiceTest {
         expectedUser.setLibrarian(null);
         expectedUser.setAnggota(new Anggota());
         expectedUser.setPassword(registerService.passwordEncoder().encode(registerRequest.getPassword()));
+        when(userRepository.findByUsername(registerRequest.getUsername())).thenReturn(null);
 
         // Mocking behavior
         when(userRepository.save(any())).thenReturn(expectedUser);
@@ -103,5 +105,18 @@ class RegisterServiceTest {
         verify(librarianRepository, never()).save(any(Librarian.class));
         verify(anggotaRepository, never()).save(any(Anggota.class));
         verify(userRepository, never()).save(any(User.class));
+    }
+    @Test
+    void testRegisterUsernameExists() {
+        // Arrange
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setUsername("existingUsername");
+        String role = "visitor";
+
+        // Mock the behavior of userRepository.findByUsername
+        when(userRepository.findByUsername("existingUsername")).thenReturn(new User());
+
+        // Act and Assert
+        assertThrows(ResponseStatusException.class, () -> registerService.register(registerRequest,role));
     }
 }
