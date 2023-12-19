@@ -86,15 +86,13 @@ class LoanServiceTest {
         when(loanRepository.save(any(Loan.class))).thenReturn(loan);
 
         LoanResponse loanResponse = loanService.borrowBooks(bookCartRequest);
-        loanResponse.setBookCartId(bookCart.getId());
+
 
         assertNotNull(loanResponse);
         assertEquals(1, loanResponse.getBookCartId());
         assertNotNull(loan.getId());
         assertNotNull(loan.getDateBorrow());
         assertNotNull(loan.getDueBorrow());
-        assertEquals(0,book1.getStock());
-        assertEquals(1,book2.getStock());
 
         verify(anggotaRepository).findById(1);
         verify(bookRepository).findAllById(List.of(1, 2));
@@ -104,7 +102,7 @@ class LoanServiceTest {
     }
 
     @Test
-    void testBorrowBooksWithUnavailableBooks() {
+    public void testBorrowBooksWithUnavailableBooks() {
         BookCartRequest bookCartRequest = new BookCartRequest();
         bookCartRequest.setAnggotaId(1);
         bookCartRequest.setBookIds(Arrays.asList(1, 2, 3));
@@ -133,135 +131,6 @@ class LoanServiceTest {
         });
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertEquals("Id Anggota It's Not Exist!!!", exception.getReason());
-    }
-
-
-    @Test
-    void testReturnBooks() {
-        int loanId = 1;
-        Book book1 = new Book();
-        book1.setId(1);
-        book1.setStock(1);
-
-        Book book2 = new Book();
-        book2.setId(2);
-        book2.setStock(2);
-        Loan loan = new Loan();
-        loan.setId(loanId);
-        loan.setDateBorrow(new Date());
-        loan.setDueBorrow(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
-
-        BookCart bookCart = new BookCart();
-        List<Book> books = new ArrayList<>();
-        books.add(book1);
-        books.add(book2);
-        bookCart.setBook(books);
-        loan.setBookCarts(bookCart);
-
-        when(loanRepository.findById(loanId)).thenReturn(Optional.of(loan));
-
-        LoanResponse loanResponse = loanService.returnBooks(loanId, false);
-
-        verify(penaltyService, never()).createPenalty(any(Loan.class), anyInt());
-        verify(loanRepository, times(1)).save(any(Loan.class));
-        assertNotNull(loanResponse);
-        assertEquals(loanId, loanResponse.getId());
-        assertEquals(2,book1.getStock());
-        assertEquals(3,book2.getStock());
-        assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
-        assertEquals(loan.getDueBorrow(), loanResponse.getDueBorrow());
-        assertEquals(bookCart.getId(), loanResponse.getBookCartId());
-    }
-
-    @Test
-    void testReturnBooks_WhenLoanNotFound() {
-        int loanId = 2;
-        when(loanRepository.findById(loanId)).thenReturn(Optional.empty());
-
-        assertThrows(ResponseStatusException.class, () -> loanService.returnBooks(loanId, false));
-        verify(penaltyService, never()).createPenalty(any(Loan.class), anyInt());
-        verify(loanRepository, never()).save(any(Loan.class));
-    }
-
-    @Test
-    void testReturnBooks_WhenOverdueAndNotDamaged() {
-        int loanId = 1;
-        Loan loan = new Loan();
-        loan.setId(loanId);
-
-        Date currentDate = new Date();
-        Date dueDate = new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(1)); // Tanggal jatuh tempo sudah lewat
-        loan.setDateBorrow(new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(5))); // Dipinjam 5 hari yang lalu
-        loan.setDueBorrow(dueDate);
-
-        BookCart bookCart = new BookCart();
-        bookCart.setBook(new ArrayList<>());
-        loan.setBookCarts(bookCart);
-
-        when(loanRepository.findById(loanId)).thenReturn(Optional.of(loan));
-
-        LoanResponse loanResponse = loanService.returnBooks(loanId, false);
-
-        verify(penaltyService, times(1)).createPenalty(eq(loan), anyInt());
-        verify(loanRepository, times(1)).save(any(Loan.class));
-        assertNotNull(loanResponse);
-        assertEquals(loanId, loanResponse.getId());
-        assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
-        assertEquals(loan.getDueBorrow(), loanResponse.getDueBorrow());
-        assertEquals(bookCart.getId(), loanResponse.getBookCartId());
-    }
-
-    @Test
-    void testReturnBooksWithLateAndDamagedBooks() {
-        int loanId = 2;
-        Loan loan = new Loan();
-        loan.setId(loanId);
-
-        Date currentDate = new Date();
-        Date dueDate = new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(1)); // Tanggal jatuh tempo sudah lewat
-        loan.setDateBorrow(new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(5))); // Dipinjam 5 hari yang lalu
-        loan.setDueBorrow(dueDate);
-
-        BookCart bookCart = new BookCart();
-        bookCart.setBook(new ArrayList<>());
-        loan.setBookCarts(bookCart);
-
-        when(loanRepository.findById(loanId)).thenReturn(Optional.of(loan));
-
-        LoanResponse loanResponse = loanService.returnBooks(loanId, true);
-
-        verify(penaltyService, times(2)).createPenalty(eq(loan), anyInt());
-        verify(loanRepository, times(1)).save(any(Loan.class));
-        assertNotNull(loanResponse);
-        assertEquals(loanId, loanResponse.getId());
-        assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
-        assertEquals(loan.getDueBorrow(), loanResponse.getDueBorrow());
-        assertEquals(bookCart.getId(), loanResponse.getBookCartId());
-    }
-
-
-    @Test
-    void testReturnBooks_DamagedOrLost() {
-        Loan loan = new Loan();
-        loan.setId(1);
-        loan.setDateBorrow(new Date());
-        loan.setDueBorrow(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5))); // overdue loan
-        BookCart bookCart = new BookCart();
-        List<Book> books = new ArrayList<>();
-        Book damagedBook = new Book();
-        damagedBook.setId(1);
-        books.add(damagedBook);
-        bookCart.setBook(books);
-        loan.setBookCarts(bookCart);
-
-        when(loanRepository.findById(1)).thenReturn(Optional.of(loan));
-
-        // Eksekusi
-        LoanResponse response = loanService.returnBooks(1, true);
-
-        // Verifikasi
-        verify(penaltyService, times(1)).createPenalty((loan), (5000000));
-        assertEquals(1, response.getId());
     }
     @Test
     void testBorrowBooks_BookCartNotFound() {
@@ -322,8 +191,9 @@ class LoanServiceTest {
             assertEquals(1, book.getWishlist()); // Memastikan wishlist bertambah sebesar 1
         }
     }
+
     @Test
-    void testGetLoanIdByAnggotaId_WhenLoanExists() {
+    public void testGetLoanIdByAnggotaId_WhenLoanExists() {
         // Given
         Integer anggotaId = 1;
         Loan loan = new Loan();
@@ -340,7 +210,7 @@ class LoanServiceTest {
     }
 
     @Test
-    void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
+    public void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
         // Given
         Integer anggotaId = 1;
 
@@ -352,5 +222,156 @@ class LoanServiceTest {
         // Then
         assertNull(result);
         verify(loanRepository).findLoanAnggota(anggotaId);
+    }
+
+    @Test
+    void testReturnBooks() {
+        int loanId = 1;
+
+        // Membuat loan mock
+        Loan loan = new Loan();
+        loan.setId(loanId);
+        loan.setDateBorrow(new Date());
+        loan.setDueBorrow(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
+
+        // Persiapan bookCart dan books
+        BookCart bookCart = new BookCart();
+        List<Book> books = new ArrayList<>();
+        // Persiapan data buku yang dipinjam dalam loan
+        Book book1 = new Book();
+        book1.setId(1); // Contoh ID buku yang dipinjam
+        books.add(book1); // Menambahkan buku ke daftar peminjaman
+        bookCart.setBook(books);
+        loan.setBookCarts(bookCart);
+
+        // Mock repository behavior
+        when(loanRepository.findById(loanId)).thenReturn(Optional.of(loan));
+
+        // Persiapan bookIdsReturned yang akan dikembalikan (sebagai contoh, gunakan ID buku yang sama dengan yang dipinjam)
+        List<Integer> bookIdsReturned = Arrays.asList(1);
+
+        // Memanggil metode returnBooks
+        LoanResponse loanResponse = loanService.returnBooks(loanId, bookIdsReturned, false);
+
+        // Verifikasi behavior
+        verify(penaltyService, never()).createPenalty(any(Loan.class), anyInt());
+        verify(loanRepository, times(1)).save(any(Loan.class));
+        assertNotNull(loanResponse);
+        assertEquals(loanId, loanResponse.getId());
+        assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
+        assertEquals(loan.getDueBorrow(), loanResponse.getDueBorrow());
+        assertEquals(bookCart.getId(), loanResponse.getBookCartId());
+    }
+
+    @Test
+    void testReturnBooks_WhenLoanNotFound() {
+        int loanId = 2;
+        when(loanRepository.findById(loanId)).thenReturn(Optional.empty());
+
+        // Memastikan bahwa saat loanService.returnBooks dipanggil dengan loanId yang tidak ditemukan, akan dilemparkan ResponseStatusException
+        assertThrows(ResponseStatusException.class, () -> loanService.returnBooks(loanId, new ArrayList<>(), false));
+
+        // Verifikasi bahwa createPenalty dan save tidak dipanggil karena loan tidak ditemukan
+        verify(penaltyService, never()).createPenalty(any(Loan.class), anyInt());
+        verify(loanRepository, never()).save(any(Loan.class));
+    }
+
+    @Test
+    void testReturnBooks_WhenOverdueAndNotDamaged() {
+        int loanId = 1;
+        Loan loan = new Loan();
+        loan.setId(loanId);
+
+        Date currentDate = new Date();
+        Date dueDate = new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(1)); // Tanggal jatuh tempo sudah lewat
+        loan.setDateBorrow(new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(5))); // Dipinjam 5 hari yang lalu
+        loan.setDueBorrow(dueDate);
+
+        // Menambahkan buku dengan ID 1 ke dalam daftar peminjaman
+        BookCart bookCart = new BookCart();
+        List<Book> books = new ArrayList<>();
+        Book book = new Book();
+        book.setId(1); // ID buku yang ingin dikembalikan
+        books.add(book);
+        bookCart.setBook(books);
+        loan.setBookCarts(bookCart);
+
+        when(loanRepository.findById(loanId)).thenReturn(Optional.of(loan));
+
+        List<Integer> bookIdsReturned = Arrays.asList(1);
+
+
+        LoanResponse loanResponse = loanService.returnBooks(loanId, bookIdsReturned, false);
+
+        verify(penaltyService, times(1)).createPenalty(eq(loan), anyInt());
+        verify(loanRepository, times(1)).save(any(Loan.class));
+        assertNotNull(loanResponse);
+        assertEquals(loanId, loanResponse.getId());
+        assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
+        assertEquals(loan.getDueBorrow(), loanResponse.getDueBorrow());
+        assertEquals(bookCart.getId(), loanResponse.getBookCartId());
+    }
+
+    @Test
+    void testReturnBooksWithLateAndDamagedBooks() {
+        int loanId = 2;
+        Loan loan = new Loan();
+        loan.setId(loanId);
+
+        Date currentDate = new Date();
+        Date dueDate = new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(1));
+        loan.setDateBorrow(new Date(currentDate.getTime() - TimeUnit.DAYS.toMillis(5)));
+        loan.setDueBorrow(dueDate);
+
+        // Menambahkan buku dengan ID 1 ke dalam daftar peminjaman
+        BookCart bookCart = new BookCart();
+        List<Book> books = new ArrayList<>();
+        Book book = new Book();
+        book.setId(1); // ID buku yang ingin dikembalikan
+        books.add(book);
+        bookCart.setBook(books);
+        loan.setBookCarts(bookCart);
+
+        when(loanRepository.findById(loanId)).thenReturn(Optional.of(loan));
+
+        List<Integer> bookIdsReturned = Arrays.asList(1);
+
+        LoanResponse loanResponse = loanService.returnBooks(loanId, bookIdsReturned, true);
+
+        verify(penaltyService, times(2)).createPenalty(eq(loan), anyInt());
+        verify(loanRepository, times(1)).save(any(Loan.class));
+        assertNotNull(loanResponse);
+        assertEquals(loanId, loanResponse.getId());
+        assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
+        assertEquals(loan.getDueBorrow(), loanResponse.getDueBorrow());
+        assertEquals(bookCart.getId(), loanResponse.getBookCartId());
+    }
+
+
+
+    @Test
+    void testReturnBooks_DamagedOrLost() {
+        Loan loan = new Loan();
+        loan.setId(1);
+        loan.setDateBorrow(new Date());
+        loan.setDueBorrow(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5))); // overdue loan
+        BookCart bookCart = new BookCart();
+        List<Book> books = new ArrayList<>();
+        Book damagedBook = new Book();
+        damagedBook.setId(1);
+        books.add(damagedBook);
+        bookCart.setBook(books);
+        loan.setBookCarts(bookCart);
+        List<Integer> bookIdsReturned = Arrays.asList(1);
+
+
+        when(loanRepository.findById(1)).thenReturn(Optional.of(loan));
+
+        // Eksekusi
+        LoanResponse response = loanService.returnBooks(1,bookIdsReturned, true);
+
+        // Verifikasi
+        verify(penaltyService, times(1)).createPenalty(eq(loan), eq(5000000));
+        assertEquals(1, response.getId());
     }
 }

@@ -3,6 +3,7 @@ package com.miniproject.library.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.miniproject.library.dto.bookcart.BookCartRequest;
 import com.miniproject.library.dto.loan.LoanResponse;
+import com.miniproject.library.entity.BookCart;
 import com.miniproject.library.service.LoanService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,16 +16,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 import java.util.Date;
 
 import static org.junit.Assert.assertSame;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(MockitoJUnitRunner.class)
 class LoanControllerTest {
@@ -69,26 +74,35 @@ class LoanControllerTest {
     @Test
     void testReturnBooksEndpoint() throws Exception {
         Integer loanId = 1;
+        BookCart bookCart = new BookCart();
+        bookCart.setId(1);
         boolean isDamagedOrLost = true;
+        String bookIdsReturned = "[1, 2, 3]"; // Represent book IDs to be returned as a String
 
         LoanResponse loanResponse = LoanResponse.builder()
                 .id(1)
                 .dateBorrow(new Date())
                 .dueBorrow(new Date())
                 .dateReturn(new Date())
-                .bookCartId(1)
+                .bookCartId(bookCart.getId())
                 .build();
-        // Set up expected response for returning books
 
-        when(loanService.returnBooks(loanId, isDamagedOrLost)).thenReturn(loanResponse);
+        // Mock behavior of loanService
+        when(loanService.returnBooks(eq(loanId), anyList(), eq(isDamagedOrLost)))
+                .thenReturn(loanResponse);
 
-        mockMvc.perform(post("/loan/return")
-                        .param("loanId", loanId.toString())
-                        .param("isDamagedOrLost", String.valueOf(isDamagedOrLost)))
-                .andExpect(status().isOk());
+        mockMvc.perform(post("/library/return/{loanId}", loanId)
+                        .param("isDamagedOrLost", String.valueOf(isDamagedOrLost))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bookIdsReturned)) // Mengirim bookIdsReturned langsung sebagai content
+                .andExpect(status().isOk())
+                .andExpect((ResultMatcher) jsonPath("$.id", is(loanResponse.getId())))
+                .andExpect((ResultMatcher) jsonPath("$.bookCartId", is(loanResponse.getBookCartId())));
+        // Add more assertions based on the response you expect
     }
+
     @Test
-    public void testGetLoanIdByAnggotaId_WhenLoanExists() {
+     void testGetLoanIdByAnggotaId_WhenLoanExists() {
         // Given
         Integer anggotaId = 1;
         Integer loanId = 10;
@@ -108,7 +122,7 @@ class LoanControllerTest {
     }
 
     @Test
-    public void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
+     void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
         // Given
         Integer anggotaId = 1;
 
@@ -125,5 +139,4 @@ class LoanControllerTest {
         }
         verify(loanService).getLoanIdByAnggotaId(anggotaId);
     }
-
 }
