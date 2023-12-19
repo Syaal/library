@@ -157,7 +157,7 @@ public class LoanService {
         updateBookStockAndRead(booksToReturn, false);
 
         loan.setDateReturn(currentDate);
-        loanRepository.save(loan);
+        loanRepository.delete(loan);
 
         return LoanResponse.builder()
                 .id(loan.getId())
