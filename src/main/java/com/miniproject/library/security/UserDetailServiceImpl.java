@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +26,11 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
         final String authenticatedUsername = String.valueOf(authenticatedUser.getUsername());
         final String authenticatedPassword = authenticatedUser.getPassword();
-        final Role userRole = authenticatedUser.getRole();
-        final SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_"+userRole.name());
 
-        return new User(authenticatedUsername, authenticatedPassword, Collections.singletonList(grantedAuthority));
+        return new User(authenticatedUsername, authenticatedPassword, mapRolesToAuthorities(Collections.singletonList(authenticatedUser.getRole())));
     }
+    private List<SimpleGrantedAuthority> mapRolesToAuthorities(List<Role> roles) {
+        return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).toList();
+    }
+
 }

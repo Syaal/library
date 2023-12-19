@@ -3,6 +3,7 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.bookcart.BookCartRequest;
 import com.miniproject.library.dto.loan.LoanResponse;
 import com.miniproject.library.entity.*;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +26,11 @@ public class LoanService {
 
     private final PenaltyService penaltyService;
 
+    private static final String ID_ANGGOTA_NOT_FOUND = "Id Anggota Not Found";
+    private static final String BOOK_OUT_OF_STOCK = "Book Out of Stock";
+    private static final String ID_LOAN_NOT_FOUND = "Id Loan Not Found";
+    private static final String ID_BOOK_CART_NOT_FOUND = "Id Bookcart Not Found";
+
     public boolean hasUnreturnedBooks(Integer anggotaId) {
         Optional<Loan> unreturnedLoan = loanRepository.findLoanAnggota(anggotaId);
         return unreturnedLoan.isPresent();
@@ -37,13 +42,13 @@ public class LoanService {
         }
 
         Anggota anggota = anggotaRepository.findById(bookCartRequest.getAnggotaId()).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
+                    new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
         List<Book> books = bookRepository.findAllById(bookCartRequest.getBookIds());
         List<Book> availableBooks = getAvailableBook(books);
 
         if (availableBooks.isEmpty()){
             increaseWishList(books);
-            throw new IllegalArgumentException("Books Out of Stock");
+            throw new ResourceNotFoundException(BOOK_OUT_OF_STOCK);
         }
 
         //create BookCart
@@ -57,7 +62,7 @@ public class LoanService {
         loan.setDateBorrow(new Date());
         loan.setDueBorrow(calculateDueDate());
         loan.setBookCarts(bookCartRepository.findById(bookCart.getId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id BookCart It's Not Exist!!!")));
+                new ResourceNotFoundException(ID_BOOK_CART_NOT_FOUND)));
         loanRepository.save(loan);
 
         //update data BookStock dan Jumlah Baca
@@ -146,7 +151,7 @@ public class LoanService {
         // Update stok buku yang dikembalikan
         List<Book> booksToReturn = returnedBooks.stream()
                 .filter(book -> bookIdsReturned.contains(book.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         updateBookStockAndRead(booksToReturn, false);
 

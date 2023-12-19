@@ -1,5 +1,8 @@
-package com.miniproject.library.security;
+package com.miniproject.library.config;
 
+import com.miniproject.library.security.JwtTokenFilter;
+import com.miniproject.library.security.UserDetailServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -44,13 +47,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        String[] swagger = {
+                "/v3/api-docs/**",
+                "/swagger-ui.html",
+                "/swagger-ui/**"
+        };
+
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/login", "/users/register/{role}", "/users/all").permitAll()
-                        .requestMatchers(Auth_Swagger).permitAll()
+                        .requestMatchers(swagger).permitAll()
                         .requestMatchers(HttpMethod.GET, "/book/{id}", "/penalty/all", "/penalty/{id}", "/category/all", "/book/all").permitAll()
                         .requestMatchers(HttpMethod.POST, "/category", "/book", "/penalty", "/loan/return").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.PUT, "/users/edit-{id}", "/librarian/edit-{id}", "/anggota/edit-{id}", "/category/edit-{id}", "/book/edit-{id}").hasRole(LIBRARIAN)
@@ -64,9 +76,4 @@ public class SecurityConfig {
                 .build();
     }
 
-    private static final String[] Auth_Swagger = {
-            "/v3/api-docs/**",
-            "/swagger-ui.html",
-            "/swagger-ui/**"
-    };
 }

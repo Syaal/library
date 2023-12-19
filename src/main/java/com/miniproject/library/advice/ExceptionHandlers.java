@@ -1,5 +1,6 @@
 package com.miniproject.library.advice;
 
+import com.miniproject.library.exception.ErrorResponse;
 import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.exception.ResourcesBadRequestException;
 import org.springframework.http.HttpStatus;
@@ -14,15 +15,19 @@ import java.util.Map;
 @RestControllerAdvice
 public class ExceptionHandlers {
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleResourcesNotFoundException(ResourceNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleResourcesNotFoundException(ResourceNotFoundException ex) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found", ex.getMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ResourcesBadRequestException.class)
-    public ResponseEntity<String> handleResourcesBadRequestException(ResourcesBadRequestException ex) {
+    public ResponseEntity<ErrorResponse> handleResourcesBadRequestException(ResourcesBadRequestException ex) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
