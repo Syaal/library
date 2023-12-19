@@ -48,8 +48,8 @@ public class AnggotaService {
     }
 
     public Anggota getAnggotaById(Integer id){
-        return anggotaRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
+         return anggotaRepository.findById(id).orElseThrow(() ->
+                    new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
     }
 
     public void deleteAnggotaById(Integer id){
