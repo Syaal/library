@@ -3,6 +3,7 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.penalty.PenaltyResponse;
 import com.miniproject.library.entity.Loan;
 import com.miniproject.library.entity.Penalty;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.PenaltyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -116,7 +117,7 @@ class PenaltyServiceTest {
         when(penaltyRepository.findById(penaltyId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(ResponseStatusException.class, () -> penaltyService.getPenaltyById(penaltyId));
+        assertThrows(ResourceNotFoundException.class, () -> penaltyService.getPenaltyById(penaltyId));
     }
 
     @Test
@@ -143,7 +144,7 @@ class PenaltyServiceTest {
         when(penaltyRepository.existsById(penaltyId)).thenReturn(false);
 
         // Act & Assert
-        assertThrows(ResponseStatusException.class, () -> penaltyService.deletePenalty(penaltyId));
+        assertThrows(ResourceNotFoundException.class, () -> penaltyService.deletePenalty(penaltyId));
         verify(penaltyRepository, never()).deleteById(penaltyId); // Pastikan tidak terpanggil jika id tidak ditemukan
     }
 }

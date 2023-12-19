@@ -3,6 +3,7 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.user.UserRequest;
 import com.miniproject.library.dto.user.UserResponse;
 import com.miniproject.library.entity.User;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,10 +78,9 @@ class UserServiceTest {
     void testGetByIdUserNotExists() {
         Integer userId = 66;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> userService.getById(userId));
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        Assertions.assertEquals("Pengguna tidak ditemukan", exception.getReason());
+        Assertions.assertEquals("User Not Found", exception.getMessage());
     }
 
     @Test
@@ -97,10 +97,9 @@ class UserServiceTest {
     void testDeleteByIdUserNotExists() {
         Integer userId = 1;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> userService.deleteById(userId));
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        Assertions.assertEquals("Pengguna tidak ditemukan", exception.getReason());
+        Assertions.assertEquals("User Not Found", exception.getMessage());
         verify(userRepository, never()).deleteById(userId);
     }
 
@@ -148,11 +147,10 @@ class UserServiceTest {
         UserRequest userRequest = new UserRequest();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> userService.updateById(userId, userRequest));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Pengguna tidak ditemukan", exception.getReason());
+        assertEquals("User Not Found", exception.getMessage());
 
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).save(any());
