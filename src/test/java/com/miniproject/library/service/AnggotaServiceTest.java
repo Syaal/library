@@ -6,10 +6,12 @@ import static org.mockito.Mockito.*;
 import com.miniproject.library.dto.anggota.AnggotaRequest;
 import com.miniproject.library.dto.anggota.AnggotaResponse;
 import com.miniproject.library.entity.Anggota;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.AnggotaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -69,11 +71,10 @@ class AnggotaServiceTest {
 
         when(anggotaRepository.findById(id)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> anggotaService.updateAnggota(request, id));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Anggota Not Found", exception.getReason());
+        assertEquals("Id Anggota Not Found", exception.getMessage());
     }
 
     @Test
@@ -143,11 +144,9 @@ class AnggotaServiceTest {
 
             when(anggotaRepository.findById(id)).thenReturn(Optional.empty());
 
-            ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+            ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                     () -> anggotaService.getAnggotaById(id));
-
-            assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-            assertEquals("Id Anggota It's Not Exist!!!", exception.getReason());
+            assertEquals("Id Anggota Not Found", exception.getMessage());
         }
 
         @Test

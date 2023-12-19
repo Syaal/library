@@ -4,6 +4,7 @@ import com.miniproject.library.dto.book.BookRequest;
 import com.miniproject.library.dto.book.BookResponse;
 import com.miniproject.library.entity.Book;
 import com.miniproject.library.entity.Category;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.BookRepository;
 import com.miniproject.library.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,10 +115,10 @@ class BookServiceTest {
 
         when(categoryRepository.findById(request.getCategoryId())).thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> bookService.addBook(request));
 
-        assertEquals("Category Id It's Not Exist", exception.getMessage());
+        assertEquals("Id Category Not Found", exception.getMessage());
     }
 
     @Test
@@ -133,11 +134,10 @@ class BookServiceTest {
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> bookService.updateBook(request, bookId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Book Not Found", exception.getReason());
+        assertEquals("Id Book Not Found", exception.getMessage());
     }
 
     @Test
@@ -220,11 +220,10 @@ class BookServiceTest {
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> bookService.getBookByIdBook(bookId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Book It's Not Exist!!!", exception.getReason());
+        assertEquals("Id Book Not Found", exception.getMessage());
     }
 
 }

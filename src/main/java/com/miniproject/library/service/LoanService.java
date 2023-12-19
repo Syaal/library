@@ -3,37 +3,47 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.bookcart.BookCartRequest;
 import com.miniproject.library.dto.loan.LoanResponse;
 import com.miniproject.library.entity.*;
-import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LoanService {
     private final LoanRepository loanRepository;
+
     private final AnggotaRepository anggotaRepository;
+
     private final BookCartRepository bookCartRepository;
+
     private final BookRepository bookRepository;
+
     private final PenaltyService penaltyService;
 
-    private static final String ID_ANGGOTA_NOT_FOUND = "Id Anggota Not Found";
-    private static final String BOOK_OUT_OF_STOCK = "Book Out of Stock";
-    private static final String ID_LOAN_NOT_FOUND = "Id Loan Not Found";
+    public boolean hasUnreturnedBooks(Integer anggotaId) {
+        Optional<Loan> unreturnedLoan = loanRepository.findLoanAnggota(anggotaId);
+        return unreturnedLoan.isPresent();
+    }
 
     public LoanResponse borrowBooks(BookCartRequest bookCartRequest){
+        if (hasUnreturnedBooks(bookCartRequest.getAnggotaId())) {
+            throw new IllegalStateException("Anda masih memiliki buku yang belum dikembalikan.");
+        }
 
         Anggota anggota = anggotaRepository.findById(bookCartRequest.getAnggotaId()).orElseThrow(() ->
-                    new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Anggota It's Not Exist!!!"));
         List<Book> books = bookRepository.findAllById(bookCartRequest.getBookIds());
         List<Book> availableBooks = getAvailableBook(books);
 
         if (availableBooks.isEmpty()){
             increaseWishList(books);
-            throw new ResourceNotFoundException(BOOK_OUT_OF_STOCK);
+            throw new IllegalArgumentException("Books Out of Stock");
         }
 
         //create BookCart
@@ -46,7 +56,8 @@ public class LoanService {
         Loan loan = new Loan();
         loan.setDateBorrow(new Date());
         loan.setDueBorrow(calculateDueDate());
-        loan.setBookCarts(bookCart);
+        loan.setBookCarts(bookCartRepository.findById(bookCart.getId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id BookCart It's Not Exist!!!")));
         loanRepository.save(loan);
 
         //update data BookStock dan Jumlah Baca
@@ -96,9 +107,9 @@ public class LoanService {
         return new Date(System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000));
     }
 
-    public LoanResponse returnBooks(Integer loanId, boolean isDamagedOrLost) {
+    public LoanResponse returnBooks(Integer loanId, List<Integer> bookIdsReturned, boolean isDamagedOrLost) {
         Loan loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new ResourceNotFoundException(ID_LOAN_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan ID not found"));
 
         Date currentDate = new Date();
 
@@ -117,7 +128,27 @@ public class LoanService {
 
         BookCart bookCart = loan.getBookCarts();
         List<Book> returnedBooks = bookCart.getBook();
-        updateBookStockAndRead(returnedBooks, false);
+
+        // Memastikan setiap buku yang dikembalikan diverifikasi secara individu
+        for (Integer bookId : bookIdsReturned) {
+            boolean foundBook = false;
+            for (Book book : returnedBooks) {
+                if (book.getId().equals(bookId)) {
+                    foundBook = true;
+                    break;
+                }
+            }
+            if (!foundBook) {
+                throw new IllegalArgumentException("Buku dengan ID " + bookId + " tidak ditemukan dalam daftar peminjaman.");
+            }
+        }
+
+        // Update stok buku yang dikembalikan
+        List<Book> booksToReturn = returnedBooks.stream()
+                .filter(book -> bookIdsReturned.contains(book.getId()))
+                .collect(Collectors.toList());
+
+        updateBookStockAndRead(booksToReturn, false);
 
         loan.setDateReturn(currentDate);
         loanRepository.save(loan);
@@ -130,8 +161,10 @@ public class LoanService {
                 .bookCartId(bookCart.getId())
                 .build();
     }
+
     public Integer getLoanIdByAnggotaId(Integer anggotaId) {
         Optional<Loan> loan = loanRepository.findLoanAnggota(anggotaId);
         return loan.map(Loan::getId).orElse(null);
     }
+
 }
