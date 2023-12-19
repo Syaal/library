@@ -4,6 +4,7 @@ import com.miniproject.library.dto.book.BookRequest;
 import com.miniproject.library.dto.book.BookResponse;
 import com.miniproject.library.entity.Book;
 import com.miniproject.library.entity.Category;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.BookRepository;
 import com.miniproject.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,8 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
+    private static final String ID_CATEGORY_NOT_FOUND = "Id Category Not Found";
+    private static final String ID_BOOK_NOT_FOUND = "Id Book Not Found";
     private final ModelMapper mapper = new ModelMapper();
 
     public BookResponse addBook(BookRequest request){
@@ -39,7 +42,7 @@ public class BookService {
 
             return mapper.map(book,BookResponse.class);
         }
-        throw new IllegalArgumentException("Category Id It's Not Exist");
+        throw new ResourceNotFoundException(ID_CATEGORY_NOT_FOUND);
     }
 
     public BookResponse updateBook(BookRequest request, Integer id){
@@ -60,7 +63,7 @@ public class BookService {
 
             return mapper.map(book,BookResponse.class);
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Book Not Found");
+        throw new ResourceNotFoundException(ID_BOOK_NOT_FOUND);
     }
 
     public List<Book> getAllBook(){
@@ -69,6 +72,6 @@ public class BookService {
 
     public Book getBookByIdBook(Integer id){
         return bookRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Id Book It's Not Exist!!!"));
+                new ResourceNotFoundException(ID_BOOK_NOT_FOUND));
     }
 }

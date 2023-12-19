@@ -3,8 +3,9 @@ package com.miniproject.library.controller;
 import com.miniproject.library.dto.book.BookRequest;
 import com.miniproject.library.dto.book.BookResponse;
 import com.miniproject.library.entity.Book;
-import com.miniproject.library.service.BookReport;
+import com.miniproject.library.util.BookReport;
 import com.miniproject.library.service.BookService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,9 @@ public class BookController {
         return ResponseEntity.ok(book);
     }
 
+    @ApiResponse(responseCode = "200", description = "Successful operation")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
     @GetMapping
     public ResponseEntity<byte[]> generateBookReport() {
             List<Book> bookList = bookService.getAllBook();

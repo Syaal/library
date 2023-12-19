@@ -4,7 +4,7 @@ import com.miniproject.library.dto.book.BookRequest;
 import com.miniproject.library.dto.book.BookResponse;
 import com.miniproject.library.entity.Book;
 import com.miniproject.library.entity.Category;
-import com.miniproject.library.service.BookReport;
+import com.miniproject.library.util.BookReport;
 import com.miniproject.library.service.BookService;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -18,7 +18,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
