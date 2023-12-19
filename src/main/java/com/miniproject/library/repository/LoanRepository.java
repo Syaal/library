@@ -10,11 +10,11 @@ import java.util.Optional;
 
 @Repository
 public interface LoanRepository extends JpaRepository<Loan,Integer> {
-    @Query("SELECT l.id From Loan l " +
+    @Query("SELECT l, b From Loan l " +
             "JOIN l.bookCarts b " +
             "JOIN b.anggota a " +
-            "WHERE a.id =: anggotaId " +
+            "WHERE a.id = :id " +
             "AND l.dateReturn IS NULL " +
             "ORDER BY l.dateBorrow DESC")
-    Optional<Loan> findLoanAnggota(@Param("anggotaId") Integer anggota);
+    Optional<Loan> findLoanAnggota(@Param("id") Integer id);
 }

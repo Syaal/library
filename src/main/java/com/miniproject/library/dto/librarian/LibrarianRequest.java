@@ -1,11 +1,12 @@
 package com.miniproject.library.dto.librarian;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class LibrarianRequest {
-    @NotBlank(message = "Masukkan NIK")
+    @NotNull(message = "Masukkan NIK")
     private Long nip;
     @NotBlank(message = "Masukkan Nama")
     private String name;

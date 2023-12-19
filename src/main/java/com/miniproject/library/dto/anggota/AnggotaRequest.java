@@ -1,11 +1,12 @@
 package com.miniproject.library.dto.anggota;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class AnggotaRequest {
-    @NotBlank(message = "Masukkan NIK")
+    @NotNull(message = "Masukkan NIK")
     private Long nik;
     @NotBlank(message = "Masukkan Nama")
     private String name;

@@ -2,7 +2,6 @@ package com.miniproject.library.config;
 
 import com.miniproject.library.security.JwtTokenFilter;
 import com.miniproject.library.security.UserDetailServiceImpl;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -56,23 +55,20 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
-                .exceptionHandling(e -> e
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/login", "/users/register/{role}", "/users/all").permitAll()
                         .requestMatchers(swagger).permitAll()
                         .requestMatchers(HttpMethod.GET, "/book/{id}", "/penalty/all", "/penalty/{id}", "/category/all", "/book/all").permitAll()
                         .requestMatchers(HttpMethod.POST, "/category", "/book", "/penalty", "/loan/return").hasRole(LIBRARIAN)
-                        .requestMatchers(HttpMethod.PUT, "/users/edit-{id}", "/librarian/edit-{id}", "/anggota/edit-{id}", "/category/edit-{id}", "/book/edit-{id}").hasRole(LIBRARIAN)
+                        .requestMatchers(HttpMethod.PUT, "/users/edit-{id}", "/librarian/edit-{id}", "/anggota/edit-{id}", "/category/edit-{id}", "/book/edit/{id}").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.GET, "/users/{id}", "/librarian/{id}", "/librarian/all", "/category/{id}", "/book").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.DELETE, "/users/delete-{id}", "/librarian/delete-{id}", "/anggota/delete-{id}", "/penalty/{id}").hasRole(LIBRARIAN)
                         .requestMatchers(HttpMethod.POST, "/loan/borrow").hasRole(VISITOR)
-                        .requestMatchers(HttpMethod.GET, "/anggota/{id}", "/anggota/all", "/loan/anggota/{anggotaId}/loanId").hasRole(VISITOR)
+                        .requestMatchers(HttpMethod.GET, "/anggota/{id}", "/anggota/all", "/loan/anggota/{anggotaId}/loanId").hasAnyRole(VISITOR, LIBRARIAN)
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
