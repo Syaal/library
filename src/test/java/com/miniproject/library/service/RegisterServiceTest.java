@@ -5,6 +5,7 @@ import com.miniproject.library.entity.Anggota;
 import com.miniproject.library.entity.Librarian;
 import com.miniproject.library.entity.Role;
 import com.miniproject.library.entity.User;
+import com.miniproject.library.exception.ResourcesBadRequestException;
 import com.miniproject.library.repository.AnggotaRepository;
 import com.miniproject.library.repository.LibrarianRepository;
 import com.miniproject.library.repository.UserRepository;
@@ -117,6 +118,6 @@ class RegisterServiceTest {
         when(userRepository.findByUsername("existingUsername")).thenReturn(new User());
 
         // Act and Assert
-        assertThrows(ResponseStatusException.class, () -> registerService.register(registerRequest,role));
+        assertThrows(ResourcesBadRequestException.class, () -> registerService.register(registerRequest,role));
     }
 }

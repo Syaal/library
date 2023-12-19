@@ -3,6 +3,7 @@ package com.miniproject.library.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.miniproject.library.dto.bookcart.BookCartRequest;
 import com.miniproject.library.dto.loan.LoanResponse;
+import com.miniproject.library.entity.BookCart;
 import com.miniproject.library.service.LoanService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,8 @@ class LoanControllerTest {
     @Test
     void testReturnBooksEndpoint() throws Exception {
         Integer loanId = 1;
+        BookCart bookCart = new BookCart();
+        bookCart.setId(1);
         boolean isDamagedOrLost = true;
         String bookIdsReturned = "[1, 2, 3]"; // Represent book IDs to be returned as a String
 
@@ -81,7 +84,7 @@ class LoanControllerTest {
                 .dateBorrow(new Date())
                 .dueBorrow(new Date())
                 .dateReturn(new Date())
-                .bookCartId(1)
+                .bookCartId(bookCart.getId())
                 .build();
 
         // Mock behavior of loanService
