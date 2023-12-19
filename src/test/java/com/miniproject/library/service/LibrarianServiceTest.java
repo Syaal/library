@@ -3,6 +3,7 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.librarian.LibrarianRequest;
 import com.miniproject.library.dto.librarian.LibrarianResponse;
 import com.miniproject.library.entity.Librarian;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.LibrarianRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,11 +74,10 @@ class LibrarianServiceTest {
         when(librarianRepository.findById(librarianId)).thenReturn(Optional.empty());
 
         // Act and Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> librarianService.updateLibrarian(request, librarianId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Librarian Not Found", exception.getReason());
+        assertEquals("Id Librarian Not Found", exception.getMessage());
     }
 
     @Test
@@ -148,11 +148,10 @@ class LibrarianServiceTest {
         when(librarianRepository.findById(librarianId)).thenReturn(Optional.empty());
 
         // Act and Assert
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> librarianService.getLibrarianById(librarianId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Librarian It's Not Exist!!!", exception.getReason());
+        assertEquals("Id Librarian Not Found", exception.getMessage());
     }
 
     @Test

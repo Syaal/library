@@ -3,6 +3,7 @@ package com.miniproject.library.service;
 import com.miniproject.library.dto.category.CategoryRequest;
 import com.miniproject.library.dto.category.CategoryResponse;
 import com.miniproject.library.entity.Category;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,11 +70,10 @@ class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> categoryService.updateCategory(request, categoryId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Category Not Found", exception.getReason());
+        assertEquals("Id Category Not Found", exception.getMessage());
     }
 
     @Test
@@ -118,10 +118,9 @@ class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> categoryService.getCategoryById(categoryId));
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Category It's Not Exist!!!", exception.getReason());
+        assertEquals("Id Category Not Found", exception.getMessage());
     }
 }

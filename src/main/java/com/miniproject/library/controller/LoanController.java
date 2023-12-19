@@ -28,22 +28,13 @@ public class LoanController {
             @PathVariable Integer loanId,
             @RequestParam List<Integer> bookIdsReturned,
             @RequestParam boolean isDamagedOrLost
-    ) {
-        try {
-            LoanResponse response = loanService.returnBooks(loanId, bookIdsReturned, isDamagedOrLost);
-            return ResponseEntity.ok().body(response);
-        } catch (IllegalArgumentException | ResponseStatusException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    ) throws IllegalArgumentException, ResponseStatusException {
+        LoanResponse response = loanService.returnBooks(loanId, bookIdsReturned, isDamagedOrLost);
+        return ResponseEntity.ok().body(response);
     }
+
     @GetMapping("/anggota/{anggotaId}/loanId")
     public ResponseEntity<Integer> getLoanIdByAnggotaId(@PathVariable Integer anggotaId) {
-        Integer loanId = loanService.getLoanIdByAnggotaId(anggotaId);
-
-        if (loanId == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan ID not found for the provided Anggota ID");
-        }
-
-        return ResponseEntity.ok(loanId);
+        return ResponseEntity.ok(loanService.getLoanIdByAnggotaId(anggotaId));
     }
 }
