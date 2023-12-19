@@ -168,7 +168,9 @@
 						<exclude>**/LibraryApplication.java/*</exclude>
 						<exclude>**/dto/transaction/*</exclude>
 						<exclude>**/security/*</exclude>
-						<exclude>**/ExceptionHandler/*</exclude>
+						<exclude>**/exception/*</exclude>
+						<exclude>**/advice/*</exclude>
+						<exclude>**/config/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

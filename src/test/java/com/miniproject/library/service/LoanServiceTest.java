@@ -6,6 +6,7 @@ import com.miniproject.library.entity.Anggota;
 import com.miniproject.library.entity.Book;
 import com.miniproject.library.entity.BookCart;
 import com.miniproject.library.entity.Loan;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,7 +103,7 @@ class LoanServiceTest {
     }
 
     @Test
-    public void testBorrowBooksWithUnavailableBooks() {
+    void testBorrowBooksWithUnavailableBooks() {
         BookCartRequest bookCartRequest = new BookCartRequest();
         bookCartRequest.setAnggotaId(1);
         bookCartRequest.setBookIds(Arrays.asList(1, 2, 3));
@@ -112,11 +113,11 @@ class LoanServiceTest {
         when(anggotaRepository.findById(1)).thenReturn(Optional.of(new Anggota()));
         when(bookRepository.findAllById(Arrays.asList(1, 2, 3))).thenReturn(unavailableBooks);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             loanService.borrowBooks(bookCartRequest);
         });
 
-        assertEquals("Books Out of Stock", exception.getMessage());
+        assertEquals("Book Out of Stock", exception.getMessage());
     }
 
     @Test
@@ -126,11 +127,10 @@ class LoanServiceTest {
 
         when(anggotaRepository.findById(999)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             loanService.borrowBooks(request);
         });
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertEquals("Id Anggota It's Not Exist!!!", exception.getReason());
+        assertEquals("Id Anggota Not Found", exception.getMessage());
     }
     @Test
     void testBorrowBooks_BookCartNotFound() {
@@ -150,12 +150,12 @@ class LoanServiceTest {
         when(bookCartRepository.findById(any())).thenReturn(Optional.empty());
 
         // Memanggil metode yang ingin diuji dan menangkap pengecualian
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> loanService.borrowBooks(bookCartRequest));
 
         // Verifikasi bahwa pengecualian terjadi dengan pesan yang diharapkan
         assertNotNull(exception);
-        assertEquals("Books Out of Stock", exception.getMessage());
+        assertEquals("Book Out of Stock", exception.getMessage());
     }
 
     @Test
@@ -175,12 +175,12 @@ class LoanServiceTest {
         when(bookRepository.save(any(Book.class))).thenReturn(new Book());
 
         // Memanggil metode yang ingin diuji dan menangkap pengecualian
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> loanService.borrowBooks(bookCartRequest));
 
         // Verifikasi bahwa pengecualian terjadi dengan pesan yang diharapkan
         assertNotNull(exception);
-        assertEquals("Books Out of Stock", exception.getMessage());
+        assertEquals("Book Out of Stock", exception.getMessage());
 
         // Verifikasi bahwa bookRepository.save dipanggil sebanyak buku yang tidak tersedia
         verify(bookRepository, times(books.size())).save(any(Book.class));
@@ -193,7 +193,7 @@ class LoanServiceTest {
     }
 
     @Test
-    public void testGetLoanIdByAnggotaId_WhenLoanExists() {
+    void testGetLoanIdByAnggotaId_WhenLoanExists() {
         // Given
         Integer anggotaId = 1;
         Loan loan = new Loan();
@@ -210,7 +210,7 @@ class LoanServiceTest {
     }
 
     @Test
-    public void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
+    void testGetLoanIdByAnggotaId_WhenLoanDoesNotExist() {
         // Given
         Integer anggotaId = 1;
 
@@ -371,7 +371,7 @@ class LoanServiceTest {
         LoanResponse response = loanService.returnBooks(1,bookIdsReturned, true);
 
         // Verifikasi
-        verify(penaltyService, times(1)).createPenalty(eq(loan), eq(5000000));
+        verify(penaltyService, times(1)).createPenalty(loan, 5000000);
         assertEquals(1, response.getId());
     }
 }

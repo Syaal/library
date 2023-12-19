@@ -4,6 +4,7 @@ import com.miniproject.library.dto.penalty.PenaltyResponse;
 import com.miniproject.library.entity.Loan;
 import com.miniproject.library.entity.Penalty;
 import com.miniproject.library.exception.ResourceNotFoundException;
+import com.miniproject.library.repository.LoanRepository;
 import com.miniproject.library.repository.PenaltyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class PenaltyServiceTest {
     }
 
     @Test
-    public void testGetAllPenalties() {
+    void testGetAllPenalties() {
         // Arrange
         List<Penalty> penaltyList = new ArrayList<>();
         Penalty penalty1 = new Penalty();
@@ -61,7 +62,7 @@ class PenaltyServiceTest {
     }
 
     @Test
-    public void testCreatePenalty() {
+    void testCreatePenalty() {
         Loan loan = new Loan();
         loan.setId(1); // Contoh ID Loan
         loan.setDateBorrow(new Date()); // Tanggal pinjam
@@ -83,7 +84,7 @@ class PenaltyServiceTest {
     }
 
     @Test
-    public void testGetPenaltyById() {
+    void testGetPenaltyById() {
         // Arrange
         int penaltyId = 1;
         Penalty penalty = new Penalty();
@@ -110,7 +111,7 @@ class PenaltyServiceTest {
     }
 
     @Test
-    public void testGetPenaltyById_NotFound() {
+    void testGetPenaltyById_NotFound() {
         // Arrange
         int penaltyId = 999; // Id yang tidak ada
 
@@ -121,7 +122,7 @@ class PenaltyServiceTest {
     }
 
     @Test
-    public void testDeletePenalty() {
+    void testDeletePenalty() {
         // Arrange
         int penaltyId = 1;
         Penalty penalty = new Penalty();
@@ -137,7 +138,7 @@ class PenaltyServiceTest {
     }
 
     @Test
-    public void testDeletePenalty_NotFound() {
+    void testDeletePenalty_NotFound() {
         // Arrange
         int penaltyId = 999; // Id yang tidak ada
 

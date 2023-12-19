@@ -4,6 +4,7 @@ import com.miniproject.library.dto.penalty.PenaltyRequest;
 import com.miniproject.library.dto.penalty.PenaltyResponse;
 import com.miniproject.library.entity.Loan;
 import com.miniproject.library.entity.Penalty;
+import com.miniproject.library.exception.ResourceNotFoundException;
 import com.miniproject.library.repository.LoanRepository;
 import com.miniproject.library.service.PenaltyService;
 import jakarta.validation.Validation;
@@ -19,10 +20,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
@@ -80,6 +83,17 @@ class PenaltyControllerTest {
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(mockResponse, responseEntity.getBody());
+    }
+
+    @Test
+    void createPenalty_WithInvalidLoanIdAndAmount_ReturnsPenaltyResponse() {
+        Integer loanId = 999;
+        Integer amount = 50;
+        Loan loan = new Loan();
+
+        when(loanRepository.findById(loanId)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> penaltyController.createPenalty(loanId, amount));
     }
 
     @Test

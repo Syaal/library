@@ -41,13 +41,13 @@ public class BookReport {
     }
 
     private PdfPTable createTable() {
-        PdfPTable table = new PdfPTable(10);
+        PdfPTable table = new PdfPTable(9);
         // Setting width of the table, its columns, and spacing
         table.setWidthPercentage(100f);
         table.setSpacingBefore(5);
 
         // Set the widths of individual columns in the table
-        float[] columnWidths = {50f, 150f, 100f, 150f, 100f, 100f, 80f, 50f, 50f, 60f};
+        float[] columnWidths = {50f, 150f, 100f, 150f, 100f, 100f, 50f, 50f, 60f};
         table.setTotalWidth(columnWidths);
         table.setLockedWidth(true); // Lock the width of the table
 
@@ -58,7 +58,7 @@ public class BookReport {
     }
 
     private void addTableHeaders(PdfPTable table) {
-        String[] headers = {"No", "Title", "Author", "Summary", "Publication Date", "Publisher", "Category", "Stock", "Read", "Wishlist"};
+        String[] headers = {"No", "Title", "Author", "Summary", "Publication Date", "Publisher", "Stock", "Read", "Wishlist"};
         Font font = FontFactory.getFont(FontFactory.TIMES_ROMAN, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
         font.setColor(Color.WHITE);
 
@@ -100,9 +100,6 @@ public class BookReport {
             table.addCell(cell);
 
             cell.setPhrase(new Phrase(book.getPublisher()));
-            table.addCell(cell);
-
-            cell.setPhrase(new Phrase(book.getCategory().getName()));
             table.addCell(cell);
 
             cell.setPhrase(new Phrase(String.valueOf(book.getStock())));
