@@ -236,6 +236,7 @@ class LoanServiceTest {
 
         // Persiapan bookCart dan books
         BookCart bookCart = new BookCart();
+        bookCart.setId(1);
         List<Book> books = new ArrayList<>();
         // Persiapan data buku yang dipinjam dalam loan
         Book book1 = new Book();
@@ -255,7 +256,7 @@ class LoanServiceTest {
 
         // Verifikasi behavior
         verify(penaltyService, never()).createPenalty(any(Loan.class), anyInt());
-        verify(loanRepository, times(1)).save(any(Loan.class));
+        verify(loanRepository, times(1)).delete(any(Loan.class));
         assertNotNull(loanResponse);
         assertEquals(loanId, loanResponse.getId());
         assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
@@ -304,7 +305,7 @@ class LoanServiceTest {
         LoanResponse loanResponse = loanService.returnBooks(loanId, bookIdsReturned, false);
 
         verify(penaltyService, times(1)).createPenalty(eq(loan), anyInt());
-        verify(loanRepository, times(1)).save(any(Loan.class));
+        verify(loanRepository, times(1)).delete(any(Loan.class));
         assertNotNull(loanResponse);
         assertEquals(loanId, loanResponse.getId());
         assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());
@@ -339,7 +340,7 @@ class LoanServiceTest {
         LoanResponse loanResponse = loanService.returnBooks(loanId, bookIdsReturned, true);
 
         verify(penaltyService, times(2)).createPenalty(eq(loan), anyInt());
-        verify(loanRepository, times(1)).save(any(Loan.class));
+        verify(loanRepository, times(1)).delete(any(Loan.class));
         assertNotNull(loanResponse);
         assertEquals(loanId, loanResponse.getId());
         assertEquals(loan.getDateBorrow(), loanResponse.getDateBorrow());

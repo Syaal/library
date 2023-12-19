@@ -6,6 +6,7 @@ import com.miniproject.library.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,6 +25,7 @@ public class LoanController {
     }
 
     @PostMapping("/return/{loanId}")
+    @PreAuthorize(value = "hasRole('ROLE_LIBRARIAN')")
     public ResponseEntity<LoanResponse> returnBooks(
             @PathVariable Integer loanId,
             @RequestParam List<Integer> bookIdsReturned,

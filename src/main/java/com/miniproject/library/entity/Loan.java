@@ -20,6 +20,6 @@ public class Loan {
     private Date dateReturn;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date dueBorrow;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private BookCart bookCarts;
 }
