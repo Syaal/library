@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,7 +30,7 @@ class BookServiceTest {
 
     @InjectMocks
     private BookService bookService;
-    Date date = new Date(123,02,01);
+    Date date = new Date(123, Calendar.FEBRUARY,1);
 
     @BeforeEach
     void setUp() {
@@ -100,7 +99,7 @@ class BookServiceTest {
         assertEquals("Makoto Shinkai", response.getAuthor());
         assertEquals("Kyoto Animation", response.getPublisher());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        assertEquals("2023-03-01", dateFormat.format(date));
+        assertEquals("2023-02-01", dateFormat.format(date));
         assertEquals(20, response.getStock());
         assertEquals("weathering with you", response.getTitle());
         assertEquals("Pilih cinta atau kiamat? ya cintalah", response.getSummary());
@@ -142,19 +141,8 @@ class BookServiceTest {
 
     @Test
     void testGetAllBook() {
-        Category category = new Category();
-        category.setId(1);
-        category.setName("Fiction");
-        Book sampleBook = new Book();
-        sampleBook.setId(1);
-        sampleBook.setAuthor("Makoto Shinkai");
-        sampleBook.setPublisher("Kyoto Animation");
-        sampleBook.setStock(20);
-        sampleBook.setPublicationDate(date);
-        sampleBook.setTitle("weathering with you");
-        sampleBook.setSummary("Pilih cinta atau kiamat? ya cintalah");
-        sampleBook.setCategory(category);
-        List<Book>expectedBookList = new ArrayList<Book>();
+        Book sampleBook = getBook();
+        List<Book>expectedBookList = new ArrayList<>();
         expectedBookList.add(sampleBook);
 
 
@@ -170,13 +158,29 @@ class BookServiceTest {
         assertEquals("Makoto Shinkai", book.getAuthor());
         assertEquals("Kyoto Animation", book.getPublisher());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        assertEquals("2023-03-01", dateFormat.format(date));
+        assertEquals("2023-02-01", dateFormat.format(date));
         assertEquals(20, book.getStock());
         assertEquals("weathering with you", book.getTitle());
         assertEquals("Pilih cinta atau kiamat? ya cintalah", book.getSummary());
         assertEquals("Fiction", book.getCategory().getName());
         verify(bookRepository, times(1)).findAll();
 
+    }
+
+    private Book getBook() {
+        Category category = new Category();
+        category.setId(1);
+        category.setName("Fiction");
+        Book sampleBook = new Book();
+        sampleBook.setId(1);
+        sampleBook.setAuthor("Makoto Shinkai");
+        sampleBook.setPublisher("Kyoto Animation");
+        sampleBook.setStock(20);
+        sampleBook.setPublicationDate(date);
+        sampleBook.setTitle("weathering with you");
+        sampleBook.setSummary("Pilih cinta atau kiamat? ya cintalah");
+        sampleBook.setCategory(category);
+        return sampleBook;
     }
 
     @Test
@@ -205,7 +209,7 @@ class BookServiceTest {
         assertEquals("Makoto Shinkai", book.getAuthor());
         assertEquals("Kyoto Animation", book.getPublisher());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        assertEquals("2023-03-01", dateFormat.format(date));
+        assertEquals("2023-02-01", dateFormat.format(date));
         assertEquals(20, book.getStock());
         assertEquals("weathering with you", book.getTitle());
         assertEquals("Pilih cinta atau kiamat? ya cintalah", book.getSummary());
@@ -226,4 +230,26 @@ class BookServiceTest {
         assertEquals("Id Book Not Found", exception.getMessage());
     }
 
+    @Test
+     void testUpdateBookWhenBookNotFound() {
+        // Arrange
+        when(bookRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // Act and Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> bookService.updateBook(new BookRequest(), 1));
+        assertEquals("Id Book Not Found", exception.getMessage());
+
+    }
+
+    @Test
+     void testUpdateBookWhenCategoryNotFound() {
+        // Arrange
+        when(bookRepository.findById(anyInt())).thenReturn(Optional.of(new Book()));
+        when(categoryRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // Act and Assert
+        assertThrows(ResourceNotFoundException.class, () ->
+            bookService.updateBook(new BookRequest(), 1));
+    }
 }

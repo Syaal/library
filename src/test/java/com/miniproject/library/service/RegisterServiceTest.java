@@ -17,9 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.modelmapper.ModelMapper;
-import org.springframework.web.server.ResponseStatusException;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -35,7 +32,6 @@ class RegisterServiceTest {
     @Mock
     AnggotaRepository anggotaRepository;
 
-    private final ModelMapper mapper = new ModelMapper();
 
     @BeforeEach
     void setUp() {
