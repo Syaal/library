@@ -18,14 +18,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 import java.util.Collection;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -61,7 +59,7 @@ import static org.mockito.Mockito.when;
         user.setRole(Role.valueOf("VISITOR"));
         user.setLibrarian(null);
         Collection<? extends GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_VISITOR"));
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getUsername().toString(), user.getPassword(), authorities);
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
 
         // Mocking UserRepository
         when(userRepository.findByUsername(userRequest.getUsername())).thenReturn(user);
@@ -78,8 +76,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-    void invalidPassword() throws Exception {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    void invalidPassword()  {
         LoginRequest userRequest = new LoginRequest();
         userRequest.setUsername("12345");
         userRequest.setPassword("testPassword");

@@ -11,11 +11,8 @@ import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +79,6 @@ class LibrarianServiceTest {
 
     @Test
     void testGetAllLibrarian() {
-        // Asumsi jika memiliki beberapa data di repository
         Librarian sampleLibrarian = new Librarian();
         sampleLibrarian.setId(1);
         sampleLibrarian.setNip(12345L);
@@ -91,7 +87,7 @@ class LibrarianServiceTest {
         sampleLibrarian.setPhone("1256756555");
         sampleLibrarian.setAddress("Bekasi Selatan");
         sampleLibrarian.setGender("Male");
-        List<Librarian> librarians = new ArrayList<Librarian>();
+        List<Librarian> librarians = new ArrayList<>();
         librarians.add(sampleLibrarian);
 
         when(librarianRepository.findAll()).thenReturn(librarians);
