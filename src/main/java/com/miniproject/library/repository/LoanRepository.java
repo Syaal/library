@@ -13,9 +13,8 @@ public interface LoanRepository extends JpaRepository<Loan,Integer> {
     @Query("SELECT l.id FROM Loan l " +
             "JOIN l.bookCarts b " +
             "JOIN b.anggota a " +
-            "WHERE a.id = :anggotaId " +  // Corrected the space here
+            "WHERE a.id = :anggotaId " + 
             "AND l.dateReturn IS NULL " +
             "ORDER BY l.dateBorrow DESC")
     Optional<Loan> findLoanAnggota(@Param("anggotaId") Integer anggotaId);
-
 }

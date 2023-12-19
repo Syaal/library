@@ -28,7 +28,6 @@ public class LoanService {
 
     private static final String ID_ANGGOTA_NOT_FOUND = "Id Anggota Not Found";
     private static final String BOOK_OUT_OF_STOCK = "Book Out of Stock";
-    private static final String ID_LOAN_NOT_FOUND = "Id Loan Not Found";
     private static final String ID_BOOK_CART_NOT_FOUND = "Id Bookcart Not Found";
 
     public boolean hasUnreturnedBooks(Integer anggotaId) {
@@ -37,12 +36,14 @@ public class LoanService {
     }
 
     public LoanResponse borrowBooks(BookCartRequest bookCartRequest){
+
         if (hasUnreturnedBooks(bookCartRequest.getAnggotaId())) {
             throw new IllegalStateException("Anda masih memiliki buku yang belum dikembalikan.");
         }
 
         Anggota anggota = anggotaRepository.findById(bookCartRequest.getAnggotaId()).orElseThrow(() ->
-                    new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
+                new ResourceNotFoundException(ID_ANGGOTA_NOT_FOUND));
+
         List<Book> books = bookRepository.findAllById(bookCartRequest.getBookIds());
         List<Book> availableBooks = getAvailableBook(books);
 
@@ -167,8 +168,8 @@ public class LoanService {
                 .build();
     }
 
-    public Integer getLoanIdByAnggotaId(Integer anggotaId) {
-        Optional<Loan> loan = loanRepository.findLoanAnggota(anggotaId);
+    public Integer getLoanIdByAnggotaId(Integer id) {
+        Optional<Loan> loan = loanRepository.findLoanAnggota(id);
         return loan.map(Loan::getId).orElse(null);
     }
 
